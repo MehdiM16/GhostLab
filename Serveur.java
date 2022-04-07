@@ -10,12 +10,13 @@ public class Serveur {
         try {
             ServerSocket serv = new ServerSocket(9999);
             while (true) {
+                Socket sock = serv.accept();
                 BufferedReader lire = new BufferedReader(new InputStreamReader(sock.getInputStream()));
                 PrintWriter ecrit = new PrintWriter(new OutputStreamWriter(sock.getOutputStream()));
 
                 lire.close();
                 ecrit.close();
-                serv.close();
+                sock.close();
             }
         } catch (Exception e) {
             System.out.println(e);
