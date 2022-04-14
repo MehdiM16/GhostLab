@@ -19,15 +19,14 @@ public class Labyrinthe {
         haut = l2;
         lab = new char[l1][l2];
     }
-    
+
     public String toString() {
         String res = "";
-        for (int i=0; i<haut; i++) {
-            for (int j=0; j<larg; j++) {
+        for (int i = 0; i < haut; i++) {
+            for (int j = 0; j < larg; j++) {
                 if (lab[i][j] == '|') {
                     res += '|';
-                }
-                else {
+                } else {
                     res += ' ';
                 }
             }

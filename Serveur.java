@@ -2,28 +2,24 @@ import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
 
+import javax.swing.event.MouseInputAdapter;
+
+import java.lang.Thread;
+
 public class Serveur {
 
     private ArrayList<Partie> liste = new ArrayList<Partie>();
     private ArrayList<Partie> partie_prete = new ArrayList<Partie>();
 
-    public boolean enregistre_joueur(String joueur_id, int port, int m) {
+    public boolean enregistre_joueur(Joueur j, int m) {
         for (Partie p : liste) {
             if (p.id == m) {
-                p.liste.add(new Joueur(joueur_id, port));
+                p.liste.add(j);
+                j.inscrit = p;
                 return true;
             }
         }
         return false;
-    }
-
-    public String liste_joueur(int i) {
-        String res = "";
-        for (Partie p : liste) {
-            if (i == p.id) {
-
-            }
-        }
     }
 
     public static void main(String[] args) {
@@ -34,7 +30,7 @@ public class Serveur {
                 Socket sock = serv.accept();
                 BufferedReader lire = new BufferedReader(new InputStreamReader(sock.getInputStream()));
                 PrintWriter ecrit = new PrintWriter(new OutputStreamWriter(sock.getOutputStream()));
-                
+
                 ecrit.println("GAMES " + String.valueOf(partie_prete.size()) + "***");
                 ecrit.flush();
                 for (Partie p : partie_prete) {
@@ -50,8 +46,13 @@ public class Serveur {
                     }
                     else {
                         Partie pnew = new Partie();
+                        //Thread tpart = new Thread(pnew,pnew.id); pas sur que soit necessaire de créer un thread pour les partie
                         liste.add(pnew);
-                        pnew.liste.add(new Joueur(instruction[1], instruction[2]));
+                        Joueur moi = new Joueur(instruction[1], instruction[2]);
+                        Thread t_joueur = new Thread(moi,String.valueOf(moi.id));
+                        moi.joueurThread = t_joueur;
+                        pnew.liste.add(moi);
+                        moi.inscrit = pnew;
                         ecrit.println("REGOK " + pnew.id + "***");
                         ecrit.flush();
                     }
@@ -63,7 +64,10 @@ public class Serveur {
                         ecrit.println("REGNO***");
                         ecrit.flush();
                     }
-                    boolean enregistre = enregistre_joueur(instruction[1], instruction[2], instruction[3]);
+                    Joueur moi = new Joueur(instruction[1], instruction[2]);
+                    Thread t_joueur = new Thread(moi,String.valueOf(moi.id));
+                    moi.joueurThread = t_joueur;
+                    boolean enregistre = enregistre_joueur(moi, instruction[3]);
                     if (enregistre)) {
                         ecrit.println("REGOK " + pnew.id + "***");
                         ecrit.flush();
@@ -124,7 +128,19 @@ public class Serveur {
                         ecrit.flush();
                     }
                 }
-                
+ 
+                else if(mess.equals("UNREG***")) {
+                    if(moi.inscrit == null) {
+                        ecrit.println("DUNNO***");
+                    } else {
+                        Partie tmp = moi.inscrit;
+                        int partie_id = tmp.id;
+                        tmp.remove(moi);
+                        moi.inscrit = null;
+                        ecrit.println("UNROK " + partie_id + "***");
+                        ecrit.flush();
+                    }
+                }
 
                 lire.close();
                 ecrit.close();
