@@ -17,5 +17,40 @@ public class Joueur implements Runnable, Serializable {
         this.id = id_tot;
         id_tot++;
     }
+    
+    public void sendMessage(String mess) {
+        try {
+            DatagramSocket ds = new DatagramSocket(); // pour envoyer
+            byte[]data = new byte[100];
+            InetSocketAddress ia = new InetSocketAddress("225.1.2.4", 11000);
+            data = mess.getBytes();
+            DatagramPacket dp = new DatagramPacket(data, data.length, ia);
+            ds.send(dp);
+            ds.close();
+        }
+        catch (Exception e) { e.printStackTrace(); }
+    }
+    
+    public String recvMessageMLT(MulticastSocket mso) { // on suppose qu'on est deja abonné
+        try {
+            byte[]data = new byte[100];
+            DatagramPacket paquet=new DatagramPacket(data,data.length);
+            mso.receive(paquet);
+            String res = new String(paquet.getData(), 0, paquet.getLength());
+            return res;
+        }
+        catch (Exception e) { e.printStackTrace(); }
+    }
+    
+    public String recvMessageNRM(DatagramSocket ds) {
+        try {
+            byte[]data = new byte[100];
+            DatagramPacket paquet=new DatagramPacket(data,data.length);
+            ds.receive(paquet);
+            String res = new String(paquet.getData(), 0, paquet.getLength());
+            return res;
+        }
+        catch (Exception e) { e.printStackTrace(); }
+    }
 
 }
