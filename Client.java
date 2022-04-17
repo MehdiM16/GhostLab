@@ -11,14 +11,15 @@ public class Client {
             PrintWriter ecrit = new PrintWriter(new OutputStreamWriter(sock.getOutputStream()));
             Scanner sc = new Scanner(System.in);
 
-            while (true) { // PROTOCOLE TCP
-                String mess = br.readLine();
+            while (!lire.readLine().equals("GOBYE***")) { // PROTOCOLE TCP
+                String mess = lire.readLine();
                 System.out.println(mess);
                 mess = sc.nextLine();
                 ecrit.print(mess);
                 ecrit.flush();
             }
 
+            sc.close();
             lire.close();
             ecrit.close();
             sock.close();

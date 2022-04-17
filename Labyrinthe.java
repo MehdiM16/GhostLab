@@ -8,9 +8,9 @@ public class Labyrinthe {
         larg = 7;
         haut = 6;
         lab = new char[6][7];
-        lab[0][0], lab[1][0], lab[2][0], lab[4][0], lab[5][0] = '|';
-        lab[5][1] = '|';
-        lab[0][2], lab[1][2], lab[2][2], lab[3][2], lab[5][2] = '|';
+        // lab[0][0], lab[1][0], lab[2][0], lab[4][0], lab[5][0] = '|';
+        // lab[5][1] = '|';
+        // lab[0][2], lab[1][2], lab[2][2], lab[3][2], lab[5][2] = '|';
         // je complète plus tard
     }
 
