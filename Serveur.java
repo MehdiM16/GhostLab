@@ -24,6 +24,7 @@ public class Serveur {
 
     public static void liste_partie(PrintWriter pw) {
         pw.println("GAMES " + String.valueOf(partie_prete.size()) + "***");
+        pw.println("bonjour frerot");
         for (Partie p : partie_prete) {
             pw.println("OGAME " + String.valueOf(p.id) + String.valueOf(p.liste.size()) + "***");
         }
@@ -107,6 +108,9 @@ public class Serveur {
                 boolean joueur_pret = false;
                 while (!joueur_pret) {
                     String mess = lire.readLine();
+                    System.out.println(mess);
+                    mess = mess.substring(0, mess.length() - 3);// on enleve les *** du message pour pourvoir le
+                                                                // manipuler plus facilement
                     if (mess.contains("NEWPL")) {
                         String[] instruction = mess.split(" ");
                         if (instruction.length != 3) {
@@ -119,6 +123,7 @@ public class Serveur {
                             liste.add(pnew);
                             moi = new Joueur(instruction[1], Integer.valueOf(instruction[2]));
                             t_joueur = new Thread(moi, String.valueOf(moi.id));
+                            t_joueur.start();
                             moi.joueurThread = t_joueur;
                             pnew.liste.add(moi);
                             moi.inscrit = pnew;
@@ -135,6 +140,7 @@ public class Serveur {
                         }
                         moi = new Joueur(instruction[1], Integer.valueOf(instruction[2]));
                         t_joueur = new Thread(moi, String.valueOf(moi.id));
+                        t_joueur.start();
                         moi.joueurThread = t_joueur;
                         boolean enregistre = enregistre_joueur(moi, Integer.valueOf(instruction[3]));
                         if (enregistre) {
@@ -150,7 +156,7 @@ public class Serveur {
                         liste_joueur(ecrit, mess);
                     }
 
-                    else if (mess.equals("GAMES***")) {
+                    else if (mess.contains("GAMES")) {
                         liste_partie(ecrit);
                     }
 
@@ -158,11 +164,11 @@ public class Serveur {
                         taille_labyrinthe(ecrit, mess);
                     }
 
-                    else if (mess.equals("UNREG***")) {
+                    else if (mess.contains("UNREG")) {
                         desinscription(ecrit, moi);
                     }
 
-                    else if (mess.equals("START***")) {
+                    else if (mess.contains("START")) {
                         if (moi.inscrit == null) {
                             ecrit.println("DUNNO***");
                             ecrit.flush();
