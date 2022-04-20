@@ -10,11 +10,15 @@ public class Joueur implements Runnable, Serializable {
     boolean pret = false;
     Partie inscrit = null;
     Thread joueurThread;
+    int positionX;
+    int positionY;
 
     public Joueur() {
         pseudo = "anonyme0";
         port_udp = -1;
         id = -1;
+        positionX = 0;
+        positionY = 0;
     }
 
     public Joueur(String pseudo, int port) {
@@ -22,6 +26,8 @@ public class Joueur implements Runnable, Serializable {
         port_udp = port;
         this.id = id_tot;
         id_tot++;
+        positionX = 0;
+        positionY = 0;
     }
 
     public void sendMessage(String mess) {
