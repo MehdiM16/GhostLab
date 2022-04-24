@@ -41,24 +41,29 @@ public class Client {
 
             String mess = lire.readLine();
             lire_partie(lire, mess);
-            while (!lire.readLine().equals("GOBYE***")) { // PROTOCOLE TCP
+            String mess_recu = "";
+            while (!mess_recu.equals("GOBYE***")) { // PROTOCOLE TCP
                 System.out.println("vous pouvez entrez un message");
                 mess = sc.nextLine();
-                System.out.println(mess);
-                ecrit.print(mess);
+                ecrit.println(mess);
                 ecrit.flush();
+                System.out.println(mess);
                 if (mess.contains("LIST")) {
                     lire_joueur(lire, mess);
                 }
 
                 else if (mess.contains("UNREG") || mess.contains("SIZE")) {
-                    String mess_recu = lire.readLine();
+                    mess_recu = lire.readLine();
                     System.out.println(mess_recu);
                 }
 
                 else if (mess.contains("GAMES")) {
-                    String partie = lire.readLine();
-                    lire_partie(lire, partie);
+                    mess_recu = lire.readLine();
+                    lire_partie(lire, mess_recu);
+                } else {
+                    lire.readLine();
+                    System.out.println(mess_recu);
+                    System.out.println("Nous venons de lire le message du serveur");
                 }
 
             }
