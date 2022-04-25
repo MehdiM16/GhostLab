@@ -10,13 +10,13 @@ public class Serveur {
 
         Socket socket;
         ArrayList<Partie> liste = new ArrayList<Partie>();
-        ArrayList<Partie> partie_prete = new ArrayList<Partie>();
+        ArrayList<Partie> partie_en_attente = new ArrayList<Partie>();
 
         public Connexion(Socket s) {
             socket = s;
         }
 
-        public boolean enregistre_joueur(Joueur j, int m) {
+        public boolean enregistre_joueur(Joueur j, int m) { // enregistre un joueur dans une partie
             for (Partie p : liste) {
                 if (p.id == m) {
                     p.liste.add(j);
@@ -28,70 +28,119 @@ public class Serveur {
         }
 
         public void liste_partie(PrintWriter pw) {
-            pw.println("GAMES " + String.valueOf(partie_prete.size()) + "***");
-            pw.println("bonjour frerot");
-            for (Partie p : partie_prete) {
-                pw.println("OGAME " + String.valueOf(p.id) + String.valueOf(p.liste.size()) + "***");
+            pw.print("GAMES " + String.valueOf(partie_en_attente.size()) + "***");
+            for (Partie p : partie_en_attente) {
+                pw.print("OGAME " + String.valueOf(p.id) + " " + String.valueOf(p.liste.size()) + "***");
             }
             pw.flush();
         }
 
-        public void liste_joueur(PrintWriter pw, String message) {
-            String[] instruction = message.split(" ");
-            if (instruction.length != 2) {
-                pw.println("REGNO***");
+        public void liste_joueur(PrintWriter pw, BufferedReader br) {
+            int num_partie = lire_nombre_fin(br);
+            if (num_partie == -1) {
+                pw.print("REGNO***");
                 pw.flush();
             } else {
                 boolean a_ecrit = false;
                 for (Partie p : liste) {
-                    if (Integer.valueOf(instruction[1]) == p.id) {
-                        pw.println("LIST! " + instruction[1] + " " + String.valueOf(p.liste.size()) + "***");
+                    if (num_partie == p.id) {
+                        pw.print("LIST! " + num_partie + " " + p.liste.size() + "***");
                         for (Joueur j : p.liste) {
-                            pw.println("PLAYR " + j.id + "***");
+                            pw.print("PLAYR " + j.id + "***");
                         }
                         a_ecrit = true;
                     }
                 }
                 if (!a_ecrit) {
-                    pw.println("DUNNO***");
+                    pw.print("DUNNO***");
                 }
                 pw.flush();
             }
         }
 
-        public void taille_labyrinthe(PrintWriter pw, String message) {
-            String[] instruction = message.split(" ");
-            if (instruction.length != 2) {
-                pw.println("DUNNO***");
+        public void taille_labyrinthe(PrintWriter pw, BufferedReader br) {
+            int num_partie = lire_nombre_fin(br);
+            if (num_partie == -1) {
+                pw.print("DUNNO***");
                 pw.flush();
             } else {
                 boolean a_ecrit = false;
                 for (Partie p : liste) {
-                    if (p.id == Integer.valueOf(instruction[1])) { // il faut enlever les *** de instruction[1]
-                        pw.println(
-                                "SIZE! " + instruction[1] + " " + p.labyrinthe.haut + " " + p.labyrinthe.larg + "***");
+                    if (p.id == num_partie) { // il faut enlever les *** de instruction[1]
+                        pw.print(
+                                "SIZE! " + num_partie + " " + p.labyrinthe.haut + " " + p.labyrinthe.larg + "***");
                         a_ecrit = true;
                     }
                 }
                 if (!a_ecrit) {
-                    pw.println("DUNNO***");
+                    pw.print("DUNNO***");
                 }
                 pw.flush();
             }
         }
 
-        public void desinscription(PrintWriter pw, Joueur j) {
-            if (j.inscrit == null) {
-                pw.println("DUNNO***");
+        public void desinscription(PrintWriter pw, BufferedReader br, Joueur j) {
+            char[] fin_mess = new char[3];
+            br.read(fin_mess, 0, 3);
+            if (j.inscrit == null || !(String.valueOf(fin_mess).equals("***"))) {
+                pw.print("DUNNO***");
                 pw.flush();
             } else {
                 Partie tmp = j.inscrit;
                 int partie_id = tmp.id;
                 tmp.liste.remove(j);
                 j.inscrit = null;
-                pw.println("UNROK " + partie_id + "***");
+                pw.print("UNROK " + partie_id + "***");
                 pw.flush();
             }
+        }
+
+        public String lire_pseudo(BufferedReader br) {
+            br.read(); // on lit l'espace
+            char lu = (char) br.read();
+            String res = "";
+            while (lu != ' ') {
+                res += lu;
+                lu = (char) br.read();
+            }
+            return res;
+        }
+
+        public int lire_nombre_fin(BufferedReader br) {
+            char lu = (char) br.read();
+            String recu = "";
+            while (lu != '*') {
+                if (Character.isDigit(lu)) {// on verifie si le caractere lu est bien un chiffre
+                    recu += lu;
+                } else {
+                    return -1;// si on lit autre chose qu'un chiffre ou une etoile on renvoie -1 pour
+                              // signifier une erreur
+                }
+            }
+            String fin = "";
+            fin += lu;
+            fin += (char) br.read();
+            fin += (char) br.read();
+            if (fin.equals("***")) {// si on recoit bien les etoile pour signifié la fin du message on retourne la
+                                    // valeur
+                return Integer.valueOf(recu);
+            } else { // sinon cela signifie que le message est erroné donc on retourne -1
+                return -1;
+            }
+        }
+
+        public int lire_nombre_milieu(BufferedReader br) {
+            char lu = (char) br.read();
+            String recu = "";
+            while (lu != ' ') {
+                if (Character.isDigit(lu)) {// on verifie si le caractere lu est bien un chiffre
+                    recu += lu;
+                } else {
+                    return -1;// si on lit autre chose qu'un chiffre ou une etoile on renvoie -1 pour
+                              // signifier une erreur
+                }
+            }
+            return Integer.valueOf(recu);
         }
 
         public void run() {
@@ -107,71 +156,87 @@ public class Serveur {
                 boolean joueur_pret = false;
 
                 while (!joueur_pret) {
-                    String mess = lire.readLine();
+                    char[] mess_type = new char[5];
+                    lire.read(mess_type, 0, 5);
+                    String mess = String.valueOf(mess_type);
                     System.out.println(mess);
                     mess = mess.substring(0, mess.length() - 3);// on enleve les *** du message pour pourvoir le
                                                                 // manipuler plus facilement
-                    if (mess.contains("NEWPL")) {
-                        String[] instruction = mess.split(" ");
-                        if (instruction.length != 3) {
-                            ecrit.println("REGNO***");
-                            ecrit.flush();
-                        } else {
-                            Partie pnew = new Partie();
-                            System.out.println("la partie d'id " + pnew.id + " viens d'etre cree");
-                            // Thread tpart = new Thread(pnew,pnew.id); pas sur que soit necessaire de créer
-                            // un thread pour les partie
-                            liste.add(pnew);
-                            moi = new Joueur(instruction[1], Integer.valueOf(instruction[2]));
+                    if (mess.equals("NEWPL")) {
+                        String pseudo = lire_pseudo(lire);
+                        int joueur_port = lire_nombre_fin(lire);
+                        if (joueur_port != -1) {
+                            moi = new Joueur(pseudo, joueur_port);
                             t_joueur = new Thread(moi, String.valueOf(moi.id));
                             t_joueur.start();
                             moi.joueurThread = t_joueur;
+                            Partie pnew = new Partie();
                             pnew.liste.add(moi);
+                            System.out.println("la partie d'id " + pnew.id + " viens d'etre cree"); // TEST
+                            // Thread tpart = new Thread(pnew,pnew.id); pas sur que soit necessaire de créer
+                            // un thread pour les partie
+                            liste.add(pnew);
+                            partie_en_attente.add(pnew);
                             moi.inscrit = pnew;
-                            ecrit.println("REGOK " + pnew.id + "***");
-                            ecrit.flush();
-                        }
-                    }
-
-                    else if (mess.contains("REGIS")) {
-                        String[] instruction = mess.split(" ");
-                        if (instruction.length != 4) {
-                            ecrit.println("REGNO***");
-                            ecrit.flush();
-                        }
-                        moi = new Joueur(instruction[1], Integer.valueOf(instruction[2]));
-                        t_joueur = new Thread(moi, String.valueOf(moi.id));
-                        t_joueur.start();
-                        moi.joueurThread = t_joueur;
-                        boolean enregistre = enregistre_joueur(moi, Integer.valueOf(instruction[3]));
-                        if (enregistre) {
-                            ecrit.println("REGOK " + instruction[3] + "***");
+                            ecrit.print("REGOK " + pnew.id + "***");
                             ecrit.flush();
                         } else {
-                            ecrit.println("REGNO***");
+                            ecrit.print("REGNO***");
                             ecrit.flush();
                         }
                     }
 
-                    else if (mess.contains("LIST?")) {
-                        liste_joueur(ecrit, mess);
+                    else if (mess.equals("REGIS")) {
+                        String pseudo = lire_pseudo(lire);
+                        int joueur_port = lire_nombre_milieu(lire);
+                        int num_partie = lire_nombre_fin(lire);
+                        if (joueur_port != -1 && num_partie != -1) {
+                            moi = new Joueur(pseudo, joueur_port);
+                            t_joueur = new Thread(moi, String.valueOf(moi.id));
+                            t_joueur.start();
+                            moi.joueurThread = t_joueur;
+                            boolean enregistre = enregistre_joueur(moi, num_partie);
+                            if (enregistre) {
+                                ecrit.print("REGOK " + num_partie + "***");
+                                ecrit.flush();
+                            } else {
+                                ecrit.print("REGNO***");
+                                ecrit.flush();
+                            }
+                        } else {
+                            ecrit.print("REGNO***");
+                            ecrit.flush();
+                        }
                     }
 
-                    else if (mess.contains("GAMES")) {
-                        liste_partie(ecrit);
+                    else if (mess.equals("LIST?")) {
+                        liste_joueur(ecrit, lire);
                     }
 
-                    else if (mess.contains("SIZE?")) {
-                        taille_labyrinthe(ecrit, mess);
+                    else if (mess.equals("GAMES")) {
+                        char[] fin_mess = new char[3];
+                        lire.read(fin_mess, 0, 3);
+                        if (!(String.valueOf(fin_mess).equals("***"))) {
+                            ecrit.print("DUNNO***");
+                            ecrit.flush();
+                        } else {
+                            liste_partie(ecrit);
+                        }
                     }
 
-                    else if (mess.contains("UNREG")) {
-                        desinscription(ecrit, moi);
+                    else if (mess.equals("SIZE?")) {
+                        taille_labyrinthe(ecrit, lire);
                     }
 
-                    else if (mess.contains("START")) {
-                        if (moi.inscrit == null) {
-                            ecrit.println("DUNNO***");
+                    else if (mess.equals("UNREG")) {
+                        desinscription(ecrit, lire, moi);
+                    }
+
+                    else if (mess.equals("START")) {
+                        char[] fin_mess = new char[3];
+                        lire.read(fin_mess, 0, 3);
+                        if (moi.inscrit == null || !(String.valueOf(fin_mess).equals("***"))) {
+                            ecrit.print("DUNNO***");
                             ecrit.flush();
                         } else {
                             joueur_pret = true;
