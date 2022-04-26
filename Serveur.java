@@ -80,49 +80,64 @@ public class Serveur {
         }
 
         public void desinscription(PrintWriter pw, BufferedReader br, Joueur j) {
-            char[] fin_mess = new char[3];
-            br.read(fin_mess, 0, 3);
-            if (j.inscrit == null || !(String.valueOf(fin_mess).equals("***"))) {
-                pw.print("DUNNO***");
-                pw.flush();
-            } else {
-                Partie tmp = j.inscrit;
-                int partie_id = tmp.id;
-                tmp.liste.remove(j);
-                j.inscrit = null;
-                pw.print("UNROK " + partie_id + "***");
-                pw.flush();
+            try {
+                char[] fin_mess = new char[3];
+                br.read(fin_mess, 0, 3);
+                if (j.inscrit == null || !(String.valueOf(fin_mess).equals("***"))) {
+                    pw.print("DUNNO***");
+                    pw.flush();
+                } else {
+                    Partie tmp = j.inscrit;
+                    int partie_id = tmp.id;
+                    tmp.liste.remove(j);
+                    j.inscrit = null;
+                    pw.print("UNROK " + partie_id + "***");
+                    pw.flush();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
 
         public String lire_pseudo(BufferedReader br) {
-            br.read(); // on lit l'espace
-            char lu = (char) br.read();
             String res = "";
-            while (lu != ' ') {
-                res += lu;
-                lu = (char) br.read();
+            try {
+                br.read(); // on lit l'espace
+                char lu = (char) br.read();
+                while (lu != ' ') {
+                    res += lu;
+                    lu = (char) br.read();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
             return res;
         }
 
         public int lire_nombre_fin(BufferedReader br) {
-            char lu = (char) br.read();
-            String recu = "";
-            while (lu != '*') {
-                if (Character.isDigit(lu)) {// on verifie si le caractere lu est bien un chiffre
-                    recu += lu;
-                } else {
-                    return -1;// si on lit autre chose qu'un chiffre ou une etoile on renvoie -1 pour
-                              // signifier une erreur
-                }
-            }
             String fin = "";
-            fin += lu;
-            fin += (char) br.read();
-            fin += (char) br.read();
-            if (fin.equals("***")) {// si on recoit bien les etoile pour signifié la fin du message on retourne la
-                                    // valeur
+            String recu = "";
+            try {
+                char lu = (char) br.read();
+                while (lu != '*') {
+                    if (Character.isDigit(lu)) {// on verifie si le caractere lu est bien un chiffre
+                        recu += lu;
+                    } else {
+                        if (lu != ' ') {
+                            return -1;// si on lit autre chose qu'un chiffre ou une etoile on renvoie -1 pour
+                                      // signifier une erreur
+                        }
+                    }
+                    lu = (char) br.read();
+                }
+                fin += lu;
+                fin += (char) br.read();
+                fin += (char) br.read();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            if (fin.equals("***") && recu.length() > 0) {// si on recoit bien les etoile pour signifié la fin du
+                                                         // message on retourne la valeur
                 return Integer.valueOf(recu);
             } else { // sinon cela signifie que le message est erroné donc on retourne -1
                 return -1;
@@ -130,17 +145,25 @@ public class Serveur {
         }
 
         public int lire_nombre_milieu(BufferedReader br) {
-            char lu = (char) br.read();
             String recu = "";
-            while (lu != ' ') {
-                if (Character.isDigit(lu)) {// on verifie si le caractere lu est bien un chiffre
-                    recu += lu;
-                } else {
-                    return -1;// si on lit autre chose qu'un chiffre ou une etoile on renvoie -1 pour
-                              // signifier une erreur
+            try {
+                char lu = (char) br.read();
+                while (lu != ' ') {
+                    if (Character.isDigit(lu)) {// on verifie si le caractere lu est bien un chiffre
+                        recu += lu;
+                    } else {
+                        return -1;// si on lit autre chose qu'un chiffre ou une etoile on renvoie -1 pour
+                                  // signifier une erreur
+                    }
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            return Integer.valueOf(recu);
+            if (recu.length() > 0) {
+                return Integer.valueOf(recu);
+            } else {
+                return -1;
+            }
         }
 
         public void run() {
@@ -160,11 +183,10 @@ public class Serveur {
                     lire.read(mess_type, 0, 5);
                     String mess = String.valueOf(mess_type);
                     System.out.println(mess);
-                    mess = mess.substring(0, mess.length() - 3);// on enleve les *** du message pour pourvoir le
-                                                                // manipuler plus facilement
                     if (mess.equals("NEWPL")) {
                         String pseudo = lire_pseudo(lire);
                         int joueur_port = lire_nombre_fin(lire);
+                        System.out.println(pseudo + " " + joueur_port);
                         if (joueur_port != -1) {
                             moi = new Joueur(pseudo, joueur_port);
                             t_joueur = new Thread(moi, String.valueOf(moi.id));
