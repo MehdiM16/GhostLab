@@ -16,7 +16,15 @@ public class Serveur {
             socket = s;
         }
 
-        public boolean enregistre_joueur(Joueur j, int m) { // enregistre un joueur dans une partie
+        public synchronized void enregistre_partie(ArrayList<Partie> part, Partie p) {
+            part.add(p);
+        }
+
+        public synchronized void remove_partie(ArrayList<Partie> part, Partie p) {
+            part.remove(p);
+        }
+
+        public synchronized boolean enregistre_joueur(Joueur j, int m) { // enregistre un joueur dans une partie
             for (Partie p : liste) {
                 if (p.id == m) {
                     p.liste.add(j);
@@ -25,6 +33,18 @@ public class Serveur {
                 }
             }
             return false;
+        }
+
+        public synchronized int remove_joueur(Joueur j) {
+            if (j.inscrit == null) {
+                return -1;
+            } else {
+                Partie tmp = j.inscrit;
+                int partie_id = tmp.id;
+                tmp.liste.remove(j);
+                j.inscrit = null;
+                return partie_id;
+            }
         }
 
         public void liste_partie(PrintWriter pw) {
@@ -67,8 +87,7 @@ public class Serveur {
                 boolean a_ecrit = false;
                 for (Partie p : liste) {
                     if (p.id == num_partie) { // il faut enlever les *** de instruction[1]
-                        pw.print(
-                                "SIZE! " + num_partie + " " + p.labyrinthe.haut + " " + p.labyrinthe.larg + "***");
+                        pw.print("SIZE! " + num_partie + " " + p.labyrinthe.larg + " " + p.labyrinthe.haut + "***");
                         a_ecrit = true;
                     }
                 }
@@ -83,15 +102,12 @@ public class Serveur {
             try {
                 char[] fin_mess = new char[3];
                 br.read(fin_mess, 0, 3);
-                if (j.inscrit == null || !(String.valueOf(fin_mess).equals("***"))) {
+                int j_supp = remove_joueur(j);
+                if (j_supp == -1 || !(String.valueOf(fin_mess).equals("***"))) {
                     pw.print("DUNNO***");
                     pw.flush();
                 } else {
-                    Partie tmp = j.inscrit;
-                    int partie_id = tmp.id;
-                    tmp.liste.remove(j);
-                    j.inscrit = null;
-                    pw.print("UNROK " + partie_id + "***");
+                    pw.print("UNROK " + j_supp + "***");
                     pw.flush();
                 }
             } catch (Exception e) {
@@ -148,13 +164,18 @@ public class Serveur {
             String recu = "";
             try {
                 char lu = (char) br.read();
-                while (lu != ' ') {
+                boolean premier_lu = true;
+                while (lu != ' ' || premier_lu) {
                     if (Character.isDigit(lu)) {// on verifie si le caractere lu est bien un chiffre
                         recu += lu;
                     } else {
-                        return -1;// si on lit autre chose qu'un chiffre ou une etoile on renvoie -1 pour
-                                  // signifier une erreur
+                        if (!premier_lu) {
+                            return -1;// si on lit autre chose qu'un chiffre ou une etoile on renvoie -1 pour
+                                      // signifier une erreur
+                        }
                     }
+                    lu = (char) br.read();
+                    premier_lu = false;
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -193,12 +214,15 @@ public class Serveur {
                             t_joueur.start();
                             moi.joueurThread = t_joueur;
                             Partie pnew = new Partie();
-                            pnew.liste.add(moi);
+                            // pnew.liste.add(moi);
+                            enregistre_joueur(moi, pnew.id);
                             System.out.println("la partie d'id " + pnew.id + " viens d'etre cree"); // TEST
                             // Thread tpart = new Thread(pnew,pnew.id); pas sur que soit necessaire de créer
                             // un thread pour les partie
-                            liste.add(pnew);
-                            partie_en_attente.add(pnew);
+                            // liste.add(pnew);
+                            enregistre_partie(liste, pnew);
+                            // partie_en_attente.add(pnew);
+                            enregistre_partie(partie_en_attente, pnew);
                             moi.inscrit = pnew;
 
                             ecrit.print("REGOK " + pnew.id + "***");
@@ -213,6 +237,7 @@ public class Serveur {
                         String pseudo = lire_pseudo(lire);
                         int joueur_port = lire_nombre_milieu(lire);
                         int num_partie = lire_nombre_fin(lire);
+                        System.out.println(pseudo + " " + joueur_port + " " + num_partie);
                         if (joueur_port != -1 && num_partie != -1) {
                             moi = new Joueur(pseudo, joueur_port);
                             t_joueur = new Thread(moi, String.valueOf(moi.id));
@@ -262,10 +287,14 @@ public class Serveur {
                             ecrit.print("DUNNO***");
                             ecrit.flush();
                         } else {
+                            ecrit.print("ATTEN***");
+                            ecrit.flush();
                             joueur_pret = true;
                         }
                     }
                 }
+
+                System.out.println("nous sommes sortie du while ahah");
 
                 lire.close();
                 ecrit.close();

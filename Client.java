@@ -159,7 +159,7 @@ public class Client {
             String mess_recu = String.valueOf(type_mess); // correspond au type de message envoyer par le serveur
             lire_partie(lire, mess_recu);
             String mess = ""; // correspond au message que le client enverra au serveur
-            while (!mess_recu.equals("GOBYE***")) { // PROTOCOLE TCP
+            while (!mess_recu.equals("GOBYE***") && !mess_recu.equals("ATTEN")) { // PROTOCOLE TCP
                 System.out.println("vous pouvez entrez un message");
                 mess = sc.nextLine();
                 mess = mess + "***";
@@ -208,10 +208,14 @@ public class Client {
                     }
                 }
 
-                else {
-                    lire.readLine();
+                else if (mess.contains("START")) {
+                    lire.read(type_mess, 0, 5);
+                    mess_recu = String.valueOf(type_mess);
                     System.out.println(mess_recu);
-                    System.out.println("Nous venons de lire le message du serveur");
+                    lire.read();
+                    lire.read();
+                    lire.read();// on lit les *** pour lire entierement le message
+
                 }
             }
 

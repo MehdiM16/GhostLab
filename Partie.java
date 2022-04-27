@@ -17,6 +17,7 @@ public class Partie implements Runnable, Serializable {
     public Partie() {
         id = id_tot;
         id_tot++;
+        labyrinthe = new Labyrinthe(6, 8); // valeur random pour test si fonctionne bien
         try {
             Socket sock = new Socket("localhost", 9999);
             DatagramSocket dgsock = new DatagramSocket();
