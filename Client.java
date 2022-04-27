@@ -6,14 +6,14 @@ public class Client {
 
     public static void lire_partie(BufferedReader br, String mess) {
         try {
-            // br.read();// on lit l'espace entre GAMES et m
             int nb_partie = lire_nombre_fin(br);
             System.out.println(mess + " " + nb_partie);
             for (int i = 0; i < nb_partie; i++) {
                 try {
                     char[] partie = new char[5];
-                    br.read(partie, 0, 5);
-                    String part = String.valueOf(partie);
+                    br.read(partie, 0, 5); // on lit 6 caractere pour lire l'espace avec le message
+                    // br.read();
+                    String part = String.valueOf(partie);// OGAME
                     int num_partie = lire_nombre_milieu(br);
                     int nb_inscrit = lire_nombre_fin(br);
                     System.out.println(part + " " + num_partie + " " + nb_inscrit);
@@ -111,13 +111,18 @@ public class Client {
         String recu = "";
         try {
             char lu = (char) br.read();
-            while (lu != ' ') {
+            boolean premier_lu = true;
+            while (lu != ' ' || premier_lu) {
                 if (Character.isDigit(lu)) {// on verifie si le caractere lu est bien un chiffre
                     recu += lu;
                 } else {
-                    return -1;// si on lit autre chose qu'un chiffre ou une etoile on renvoie -1 pour
-                              // signifier une erreur
+                    if (!premier_lu) {
+                        return -1;// si on lit autre chose qu'un chiffre ou une etoile on renvoie -1 pour
+                                  // signifier une erreur
+                    }
                 }
+                lu = (char) br.read();
+                premier_lu = false;
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -187,12 +192,27 @@ public class Client {
                     lire.read(type_mess, 0, 5);
                     mess_recu = String.valueOf(type_mess);
                     lire_partie(lire, mess_recu);
-                } else {
+                }
+
+                else if (mess.contains("REGIS") || mess.contains("NEWPL")) {
+                    lire.read(type_mess, 0, 5);
+                    mess_recu = String.valueOf(type_mess);
+                    if (mess_recu.equals("REGNO")) {
+                        System.out.println(mess_recu);
+                        lire.read();
+                        lire.read();
+                        lire.read(); // on lit les *** pour lire entierement le message
+                    } else {
+                        int num_partie = lire_nombre_fin(lire);
+                        System.out.println(mess_recu + " " + num_partie);
+                    }
+                }
+
+                else {
                     lire.readLine();
                     System.out.println(mess_recu);
                     System.out.println("Nous venons de lire le message du serveur");
                 }
-                // FAIRE CAS NEWPL ET REGIS POUR CONNEXION A UNE PARTIE
             }
 
             sc.close();

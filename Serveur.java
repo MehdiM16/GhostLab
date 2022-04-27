@@ -30,7 +30,7 @@ public class Serveur {
         public void liste_partie(PrintWriter pw) {
             pw.print("GAMES " + String.valueOf(partie_en_attente.size()) + "***");
             for (Partie p : partie_en_attente) {
-                pw.print("OGAME " + String.valueOf(p.id) + " " + String.valueOf(p.liste.size()) + "***");
+                pw.print("OGAME " + p.id + " " + p.liste.size() + "***");
             }
             pw.flush();
         }
@@ -46,7 +46,7 @@ public class Serveur {
                     if (num_partie == p.id) {
                         pw.print("LIST! " + num_partie + " " + p.liste.size() + "***");
                         for (Joueur j : p.liste) {
-                            pw.print("PLAYR " + j.id + "***");
+                            pw.print("PLAYR " + j.pseudo + "***");
                         }
                         a_ecrit = true;
                     }
@@ -200,6 +200,7 @@ public class Serveur {
                             liste.add(pnew);
                             partie_en_attente.add(pnew);
                             moi.inscrit = pnew;
+
                             ecrit.print("REGOK " + pnew.id + "***");
                             ecrit.flush();
                         } else {
