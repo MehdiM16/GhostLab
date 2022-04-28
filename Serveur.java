@@ -9,8 +9,8 @@ public class Serveur {
     static class Connexion implements Runnable {
 
         Socket socket;
-        ArrayList<Partie> liste = new ArrayList<Partie>();
-        ArrayList<Partie> partie_en_attente = new ArrayList<Partie>();
+        static ArrayList<Partie> liste = new ArrayList<Partie>();
+        static ArrayList<Partie> partie_en_attente = new ArrayList<Partie>();
 
         public Connexion(Socket s) {
             socket = s;
@@ -27,9 +27,8 @@ public class Serveur {
         public synchronized boolean enregistre_joueur(Joueur j, int m) { // enregistre un joueur dans une partie
             for (Partie p : liste) {
                 if (p.id == m) {
-                    p.liste.add(j);
-                    j.inscrit = p;
-                    return true;
+                    boolean ajout = p.enregistre_joueur(j);
+                    return ajout;
                 }
             }
             return false;
@@ -40,9 +39,7 @@ public class Serveur {
                 return -1;
             } else {
                 Partie tmp = j.inscrit;
-                int partie_id = tmp.id;
-                tmp.liste.remove(j);
-                j.inscrit = null;
+                int partie_id = tmp.remove_joueur(j);
                 return partie_id;
             }
         }
@@ -50,7 +47,7 @@ public class Serveur {
         public void liste_partie(PrintWriter pw) {
             pw.print("GAMES " + String.valueOf(partie_en_attente.size()) + "***");
             for (Partie p : partie_en_attente) {
-                pw.print("OGAME " + p.id + " " + p.liste.size() + "***");
+                pw.print("OGAME " + p.id + " " + p.nombre_inscrit() + "***");
             }
             pw.flush();
         }
@@ -64,8 +61,8 @@ public class Serveur {
                 boolean a_ecrit = false;
                 for (Partie p : liste) {
                     if (num_partie == p.id) {
-                        pw.print("LIST! " + num_partie + " " + p.liste.size() + "***");
-                        for (Joueur j : p.liste) {
+                        pw.print("LIST! " + num_partie + " " + p.nombre_inscrit() + "***");
+                        for (Joueur j : p.getList()) {
                             pw.print("PLAYR " + j.pseudo + "***");
                         }
                         a_ecrit = true;
@@ -215,7 +212,6 @@ public class Serveur {
                             moi.joueurThread = t_joueur;
                             Partie pnew = new Partie();
                             // pnew.liste.add(moi);
-                            enregistre_joueur(moi, pnew.id);
                             System.out.println("la partie d'id " + pnew.id + " viens d'etre cree"); // TEST
                             // Thread tpart = new Thread(pnew,pnew.id); pas sur que soit necessaire de créer
                             // un thread pour les partie
@@ -223,10 +219,20 @@ public class Serveur {
                             enregistre_partie(liste, pnew);
                             // partie_en_attente.add(pnew);
                             enregistre_partie(partie_en_attente, pnew);
-                            moi.inscrit = pnew;
-
-                            ecrit.print("REGOK " + pnew.id + "***");
-                            ecrit.flush();
+                            boolean enregistre = enregistre_joueur(moi, pnew.id);
+                            // moi.inscrit = pnew;
+                            if (enregistre) {
+                                ecrit.print("REGOK " + pnew.id + "***");
+                                ecrit.flush();
+                            } else {
+                                ecrit.print("REGNO***");
+                                ecrit.flush();
+                            }
+                            if (moi.inscrit == null) {
+                                System.out.println("frerot tes pas inscrit");
+                            } else {
+                                System.out.println("tes inscrit frerot");
+                            }
                         } else {
                             ecrit.print("REGNO***");
                             ecrit.flush();
@@ -250,6 +256,11 @@ public class Serveur {
                             } else {
                                 ecrit.print("REGNO***");
                                 ecrit.flush();
+                            }
+                            if (moi.inscrit == null) {
+                                System.out.println("frerot tes pas inscrit");
+                            } else {
+                                System.out.println("tes inscrit frerot");
                             }
                         } else {
                             ecrit.print("REGNO***");

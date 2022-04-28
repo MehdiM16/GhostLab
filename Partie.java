@@ -26,6 +26,31 @@ public class Partie implements Runnable, Serializable {
         }
     }
 
+    public synchronized boolean enregistre_joueur(Joueur j) { // enregistre un joueur dans une partie
+        boolean ajout = liste.add(j);
+        j.inscrit = this;
+        return ajout;
+
+    }
+
+    public synchronized int remove_joueur(Joueur j) {
+        boolean retire = liste.remove(j);
+        if (retire) {
+            j.inscrit = null;
+            return this.id;
+        } else {
+            return -1;
+        }
+    }
+
+    public synchronized int nombre_inscrit() {
+        return liste.size();
+    }
+
+    public synchronized ArrayList<Joueur> getList() {
+        return liste;
+    }
+
     public boolean peut_commencer() {
         for (Joueur j : liste) {
             if (!j.pret)
