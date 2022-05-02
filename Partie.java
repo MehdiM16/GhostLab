@@ -2,6 +2,7 @@ import java.io.*;
 import java.net.*;
 import java.lang.Runnable;
 import java.util.ArrayList;
+import java.lang.Thread;
 
 public class Partie implements Runnable, Serializable {
 
@@ -10,20 +11,27 @@ public class Partie implements Runnable, Serializable {
     static int id_tot = 0;
     boolean start = false;
     Labyrinthe labyrinthe;
-
+    Thread partThread;
+    String address_diffusion;
+    int port_diffusion;
     Socket sock;
     DatagramSocket dgsock;
 
-    public Partie() {
+    public Partie(Socket s) {
+        sock = s;
         id = id_tot;
         id_tot++;
+        address_diffusion = "225.1.1." + String.valueOf(id);
+        port_diffusion = 12000 + id;
         labyrinthe = new Labyrinthe(6, 8); // valeur random pour test si fonctionne bien
-        try {
-            Socket sock = new Socket("localhost", 9999);
-            DatagramSocket dgsock = new DatagramSocket();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        /*
+         * try {
+         * Socket sock = new Socket("localhost", 9999);
+         * DatagramSocket dgsock = new DatagramSocket();
+         * } catch (Exception e) {
+         * e.printStackTrace();
+         * }
+         */
     }
 
     public synchronized boolean enregistre_joueur(Joueur j) { // enregistre un joueur dans une partie
@@ -116,6 +124,23 @@ public class Partie implements Runnable, Serializable {
     }
 
     public void run() {
+        try {
+            BufferedReader lire = new BufferedReader(new InputStreamReader(sock.getInputStream()));
+            PrintWriter ecrit = new PrintWriter(new OutputStreamWriter(sock.getOutputStream()));
+            System.out.println("Je suis une partie");
+            while (!peut_commencer()) {
+                // System.out.println("tout les joueur ne sont pas pret");
+                start = false;
+                Thread.sleep(1000);
+            }
+            start = true;
+            System.out.println("la partie commence");
+            ecrit.print("WELCO " + id + " " + labyrinthe.haut + " " + labyrinthe.larg + " " + labyrinthe.nombre_fantome
+                    + " " + address_diffusion + " " + port_diffusion + "***");
+            ecrit.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }

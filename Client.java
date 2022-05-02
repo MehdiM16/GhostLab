@@ -134,7 +134,7 @@ public class Client {
         }
     }
 
-    public static String lire_pseudo(BufferedReader br) {
+    public static String lire_pseudo(BufferedReader br) { // lit un pseudo qui se situe au milieu d'un message
         String res = "";
         try {
             br.read(); // on lit l'espace
@@ -159,11 +159,11 @@ public class Client {
             String mess_recu = String.valueOf(type_mess); // correspond au type de message envoyer par le serveur
             lire_partie(lire, mess_recu);
             String mess = ""; // correspond au message que le client enverra au serveur
-            while (!mess_recu.equals("GOBYE***") && !mess_recu.equals("ATTEN")) { // PROTOCOLE TCP
+            boolean est_inscrit = false;
+            while (!mess.equals("START")) { // PROTOCOLE TCP
                 System.out.println("vous pouvez entrez un message");
                 mess = sc.nextLine();
-                mess = mess + "***";
-                ecrit.print(mess);
+                ecrit.print(mess + "***");
                 ecrit.flush();
                 System.out.println(mess);
                 if (mess.contains("LIST?")) {
@@ -205,18 +205,48 @@ public class Client {
                     } else {
                         int num_partie = lire_nombre_fin(lire);
                         System.out.println(mess_recu + " " + num_partie);
+                        est_inscrit = true;
                     }
                 }
 
                 else if (mess.contains("START")) {
-                    lire.read(type_mess, 0, 5);
-                    mess_recu = String.valueOf(type_mess);
-                    System.out.println(mess_recu);
-                    lire.read();
-                    lire.read();
-                    lire.read();// on lit les *** pour lire entierement le message
+                    /*
+                     * lire.read(type_mess, 0, 5);
+                     * mess_recu = String.valueOf(type_mess);
+                     * System.out.println(mess_recu);
+                     * lire.read();
+                     * lire.read();
+                     * lire.read();// on lit les *** pour lire entierement le message
+                     */
 
                 }
+            }
+
+            if (est_inscrit) {
+                lire.read(type_mess, 0, 5);
+                mess_recu = String.valueOf(type_mess);
+            }
+
+            MulticastSocket sock_multi;
+
+            boolean partie_en_cours = false;
+
+            if (mess_recu.equals("WELCO")) {
+                int num_partie = lire_nombre_milieu(lire);
+                int hauteur = lire_nombre_milieu(lire);
+                int largeur = lire_nombre_milieu(lire);
+                int nb_fantome = lire_nombre_milieu(lire);
+                String ip_partie = lire_pseudo(lire);
+                int port_dif = lire_nombre_fin(lire);
+                System.out.println("WELCO " + num_partie + " " + hauteur + " " + largeur + " " + nb_fantome + " "
+                        + ip_partie + " " + port_dif);
+                sock_multi = new MulticastSocket(port_dif);
+                sock_multi.joinGroup(InetAddress.getByName(ip_partie));
+                partie_en_cours = true;
+            }
+
+            while (partie_en_cours) {
+
             }
 
             sc.close();

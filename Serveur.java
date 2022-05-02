@@ -190,7 +190,7 @@ public class Serveur {
                 PrintWriter ecrit = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
 
                 Joueur moi = new Joueur();
-                Thread t_joueur;
+                // Thread t_joueur;
 
                 liste_partie(ecrit);
 
@@ -207,13 +207,15 @@ public class Serveur {
                         System.out.println(pseudo + " " + joueur_port);
                         if (joueur_port != -1) {
                             moi = new Joueur(pseudo, joueur_port);
-                            t_joueur = new Thread(moi, String.valueOf(moi.id));
-                            t_joueur.start();
-                            moi.joueurThread = t_joueur;
-                            Partie pnew = new Partie();
-                            // pnew.liste.add(moi);
+                            // t_joueur = new Thread(moi, String.valueOf(moi.id));
+                            // t_joueur.start();
+                            // moi.joueurThread = t_joueur;
+                            Partie pnew = new Partie(socket);
                             System.out.println("la partie d'id " + pnew.id + " viens d'etre cree"); // TEST
-                            // Thread tpart = new Thread(pnew,pnew.id); pas sur que soit necessaire de créer
+                            Thread tpart = new Thread(pnew, String.valueOf(pnew.id)); // pas sur que soit necessaire de
+                                                                                      // créer
+                            tpart.start();
+                            pnew.partThread = tpart;
                             // un thread pour les partie
                             // liste.add(pnew);
                             enregistre_partie(liste, pnew);
@@ -246,9 +248,9 @@ public class Serveur {
                         System.out.println(pseudo + " " + joueur_port + " " + num_partie);
                         if (joueur_port != -1 && num_partie != -1) {
                             moi = new Joueur(pseudo, joueur_port);
-                            t_joueur = new Thread(moi, String.valueOf(moi.id));
-                            t_joueur.start();
-                            moi.joueurThread = t_joueur;
+                            // t_joueur = new Thread(moi, String.valueOf(moi.id));
+                            // t_joueur.start();
+                            // moi.joueurThread = t_joueur;
                             boolean enregistre = enregistre_joueur(moi, num_partie);
                             if (enregistre) {
                                 ecrit.print("REGOK " + num_partie + "***");
@@ -295,17 +297,33 @@ public class Serveur {
                         char[] fin_mess = new char[3];
                         lire.read(fin_mess, 0, 3);
                         if (moi.inscrit == null || !(String.valueOf(fin_mess).equals("***"))) {
-                            ecrit.print("DUNNO***");
-                            ecrit.flush();
+                            // ecrit.print("DUNNO***");
+                            // ecrit.flush();
+                            joueur_pret = false;
                         } else {
-                            ecrit.print("ATTEN***");
-                            ecrit.flush();
+                            // ecrit.print("ATTEN***");
+                            // ecrit.flush();
                             joueur_pret = true;
                         }
                     }
                 }
 
                 System.out.println("nous sommes sortie du while ahah");
+                boolean partie_en_cours = false;
+
+                while (!moi.inscrit.peut_commencer()) {
+                    partie_en_cours = false;
+                    Thread.sleep(1000);
+                }
+
+                if (moi.inscrit.peut_commencer()) {
+                    partie_en_cours = true;
+                    System.out.println("la partie peut commencer");
+                }
+
+                while (partie_en_cours) {
+
+                }
 
                 lire.close();
                 ecrit.close();
