@@ -44,12 +44,9 @@ public class Client {
                 char[] joueur_i = new char[5];
                 br.read(joueur_i, 0, 5);
                 String joueur_s = String.valueOf(joueur_i);
-                // br.read();// on lit l'espace
-                String pseudo = lire_pseudo(br);
+                br.read();// on lit l'espace
+                String pseudo = lire_pseudo_fin(br);
                 System.out.println(joueur_s + " " + pseudo);
-                br.read();
-                br.read();
-                br.read(); // on lit les *** pour lire entierement le message
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -135,7 +132,7 @@ public class Client {
         }
     }
 
-    public static String lire_pseudo(BufferedReader br) { // on lit un string qui se situe au milieu d'un message
+    public static String lire_pseudo_milieu(BufferedReader br) { // on lit un string qui se situe au milieu d'un message
         String res = "";
         try {
             // br.read(); // on lit l'espace
@@ -144,6 +141,37 @@ public class Client {
                 res += lu;
                 lu = (char) br.read();
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return res;
+    }
+
+    public static String lire_pseudo_fin(BufferedReader br) { // on lit un string qui se situe au milieu d'un message
+        String res = "";
+        String fin = "";
+        boolean prec_etoile = false;
+        try {
+            // br.read(); // on lit l'espace
+            char lu = (char) br.read();
+            while (!fin.equals("***")) {
+                if (lu == '*') {
+                    fin += lu;
+                    prec_etoile = true;
+                } else {
+                    if (prec_etoile) { // on arrive dans ce cas si on lit seulement 1 ou 2 etoiles au milieu d'un
+                                       // string
+                        res += fin;
+                        fin = "";
+                    }
+                    res += lu;
+                    prec_etoile = false;
+                }
+                if (!fin.equals("***")) {
+                    lu = (char) br.read();
+                }
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -241,7 +269,7 @@ public class Client {
                 int hauteur = lire_nombre_milieu(lire);
                 int largeur = lire_nombre_milieu(lire);
                 int nb_fantome = lire_nombre_milieu(lire);
-                String ip_partie = lire_pseudo(lire);
+                String ip_partie = lire_pseudo_milieu(lire);
                 int port_dif = lire_nombre_fin(lire);
                 System.out.println("WELCO " + num_partie + " " + hauteur + " " + largeur + " " + nb_fantome + " "
                         + ip_partie + " " + port_dif);

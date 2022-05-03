@@ -1,15 +1,15 @@
 public class Labyrinthe {
 
-    short larg;
-    short haut;
+    byte[] larg;
+    byte[] haut;
     int nombre_fantome;
     char[][] lab;
 
     public Labyrinthe() { // exemple du sujet
-        larg = 7;
-        haut = 6;
+        larg = shortToLittleEndian((short) 7);
+        haut = shortToLittleEndian((short) 6);
         lab = new char[6][7];
-        nombre_fantome = (larg + haut) / 4;
+        nombre_fantome = (6 + 7) / 4;
         // lab[0][0], lab[1][0], lab[2][0], lab[4][0], lab[5][0] = '|';
         // lab[5][1] = '|';
         // lab[0][2], lab[1][2], lab[2][2], lab[3][2], lab[5][2] = '|';
@@ -17,16 +17,32 @@ public class Labyrinthe {
     }
 
     public Labyrinthe(short l1, short l2) {
-        larg = l1;
-        haut = l2;
+        larg = shortToLittleEndian(l1);
+        haut = shortToLittleEndian(l2);
         lab = new char[l1][l2];
-        nombre_fantome = (larg + haut) / 4;
+        nombre_fantome = (l1 + l2) / 4;
+    }
+
+    public byte[] shortToLittleEndian(short numero) {
+        byte[] b = new byte[4];
+        b[0] = (byte) (numero & 0xFF);
+        b[1] = (byte) ((numero >> 8) & 0xFF);
+        b[2] = (byte) ((numero >> 16) & 0xFF);
+        b[3] = (byte) ((numero >> 24) & 0xFF);
+        return b;
+    }
+
+    public int littleEndianToInt(byte[] tab) {
+        int res = java.nio.ByteBuffer.wrap(tab).order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt();
+        return res;
     }
 
     public String toString() {
         String res = "";
-        for (int i = 0; i < haut; i++) {
-            for (int j = 0; j < larg; j++) {
+        int l = littleEndianToInt(larg);
+        int h = littleEndianToInt(haut);
+        for (int i = 0; i < l; i++) {
+            for (int j = 0; j < h; j++) {
                 if (lab[i][j] == '|') {
                     res += '|';
                 } else {

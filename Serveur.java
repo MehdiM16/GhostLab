@@ -83,8 +83,10 @@ public class Serveur {
             } else {
                 boolean a_ecrit = false;
                 for (Partie p : liste) {
+                    int larg = p.labyrinthe.littleEndianToInt(p.labyrinthe.larg);
+                    int haut = p.labyrinthe.littleEndianToInt(p.labyrinthe.haut);
                     if (p.id == num_partie) { // il faut enlever les *** de instruction[1]
-                        pw.print("SIZE! " + num_partie + " " + p.labyrinthe.larg + " " + p.labyrinthe.haut + "***");
+                        pw.print("SIZE! " + num_partie + " " + larg + " " + haut + "***");
                         a_ecrit = true;
                     }
                 }
@@ -210,7 +212,7 @@ public class Serveur {
                             // t_joueur = new Thread(moi, String.valueOf(moi.id));
                             // t_joueur.start();
                             // moi.joueurThread = t_joueur;
-                            Partie pnew = new Partie(socket);
+                            Partie pnew = new Partie();
                             System.out.println("la partie d'id " + pnew.id + " viens d'etre cree"); // TEST
                             Thread tpart = new Thread(pnew, String.valueOf(pnew.id)); // pas sur que soit necessaire de
                                                                                       // créer
@@ -319,9 +321,11 @@ public class Serveur {
 
                 if (moi.inscrit.peut_commencer()) {
                     partie_en_cours = true;
+                    int larg = moi.inscrit.labyrinthe.littleEndianToInt(moi.inscrit.labyrinthe.larg);
+                    int haut = moi.inscrit.labyrinthe.littleEndianToInt(moi.inscrit.labyrinthe.haut);
                     System.out.println("la partie peut commencer");
-                    ecrit.print("WELCO " + moi.inscrit.id + " " + moi.inscrit.labyrinthe.haut + " "
-                            + moi.inscrit.labyrinthe.larg + " " + moi.inscrit.labyrinthe.nombre_fantome
+                    ecrit.print("WELCO " + moi.inscrit.id + " " + haut + " "
+                            + larg + " " + moi.inscrit.labyrinthe.nombre_fantome
                             + " " + moi.inscrit.address_diffusion + " " + moi.inscrit.port_diffusion + "***");
                     ecrit.flush();
                 }

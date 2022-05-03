@@ -18,8 +18,7 @@ public class Partie implements Runnable, Serializable {
     Socket sock;
     DatagramSocket dgsock;
 
-    public Partie(Socket s) {
-        sock = s;
+    public Partie() {
         id = id_tot;
         id_tot++;
         address_diffusion = "225.1.1." + String.valueOf(id);
@@ -72,8 +71,8 @@ public class Partie implements Runnable, Serializable {
 
     public boolean canPlayTour(int posX, int posY, int dir, int pas) {
         char[][] grille = labyrinthe.lab;
-        int largeur = labyrinthe.larg;
-        int hauteur = labyrinthe.haut;
+        int largeur = labyrinthe.littleEndianToInt(labyrinthe.larg);
+        int hauteur = labyrinthe.littleEndianToInt(labyrinthe.haut);
 
         if (dir == 1) { // UPMOV
             if (posX - pas < 0)
@@ -128,8 +127,10 @@ public class Partie implements Runnable, Serializable {
 
     public void run() {
         try {
-            BufferedReader lire = new BufferedReader(new InputStreamReader(sock.getInputStream()));
-            PrintWriter ecrit = new PrintWriter(new OutputStreamWriter(sock.getOutputStream()));
+            // BufferedReader lire = new BufferedReader(new
+            // InputStreamReader(sock.getInputStream()));
+            // PrintWriter ecrit = new PrintWriter(new
+            // OutputStreamWriter(sock.getOutputStream()));
             System.out.println("Je suis une partie");
             while (!peut_commencer()) {
                 // System.out.println("tout les joueur ne sont pas pret");
