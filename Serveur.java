@@ -304,6 +304,7 @@ public class Serveur {
                             // ecrit.print("ATTEN***");
                             // ecrit.flush();
                             joueur_pret = true;
+                            moi.pret = true;
                         }
                     }
                 }
@@ -319,6 +320,10 @@ public class Serveur {
                 if (moi.inscrit.peut_commencer()) {
                     partie_en_cours = true;
                     System.out.println("la partie peut commencer");
+                    ecrit.print("WELCO " + moi.inscrit.id + " " + moi.inscrit.labyrinthe.haut + " "
+                            + moi.inscrit.labyrinthe.larg + " " + moi.inscrit.labyrinthe.nombre_fantome
+                            + " " + moi.inscrit.address_diffusion + " " + moi.inscrit.port_diffusion + "***");
+                    ecrit.flush();
                 }
 
                 while (partie_en_cours) {

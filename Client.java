@@ -44,6 +44,7 @@ public class Client {
                 char[] joueur_i = new char[5];
                 br.read(joueur_i, 0, 5);
                 String joueur_s = String.valueOf(joueur_i);
+                // br.read();// on lit l'espace
                 String pseudo = lire_pseudo(br);
                 System.out.println(joueur_s + " " + pseudo);
                 br.read();
@@ -134,13 +135,15 @@ public class Client {
         }
     }
 
-    public static String lire_pseudo(BufferedReader br) { // lit un pseudo qui se situe au milieu d'un message
+    public static String lire_pseudo(BufferedReader br) { // on lit un string qui se situe au milieu d'un message
         String res = "";
         try {
-            br.read(); // on lit l'espace
-            char[] pseudo = new char[8];
-            br.read(pseudo, 0, 8);
-            res = String.valueOf(pseudo);
+            // br.read(); // on lit l'espace
+            char lu = (char) br.read();
+            while (lu != ' ' || res.length() == 0) {
+                res += lu;
+                lu = (char) br.read();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -223,8 +226,10 @@ public class Client {
             }
 
             if (est_inscrit) {
+                System.out.println("je vais lire");
                 lire.read(type_mess, 0, 5);
                 mess_recu = String.valueOf(type_mess);
+                System.out.println("j'ai lu");
             }
 
             MulticastSocket sock_multi;

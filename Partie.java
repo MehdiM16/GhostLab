@@ -7,13 +7,14 @@ import java.lang.Thread;
 public class Partie implements Runnable, Serializable {
 
     ArrayList<Joueur> liste = new ArrayList<Joueur>();
-    final int id;
-    static int id_tot = 0;
+    final byte id;
+    static byte id_tot = 0;
+    byte nombre_joueur = 0;
     boolean start = false;
     Labyrinthe labyrinthe;
     Thread partThread;
     String address_diffusion;
-    int port_diffusion;
+    String port_diffusion;
     Socket sock;
     DatagramSocket dgsock;
 
@@ -22,8 +23,8 @@ public class Partie implements Runnable, Serializable {
         id = id_tot;
         id_tot++;
         address_diffusion = "225.1.1." + String.valueOf(id);
-        port_diffusion = 12000 + id;
-        labyrinthe = new Labyrinthe(6, 8); // valeur random pour test si fonctionne bien
+        port_diffusion = String.valueOf(8000 + id);
+        labyrinthe = new Labyrinthe(); // valeur random pour test si fonctionne bien
         /*
          * try {
          * Socket sock = new Socket("localhost", 9999);
@@ -37,6 +38,7 @@ public class Partie implements Runnable, Serializable {
     public synchronized boolean enregistre_joueur(Joueur j) { // enregistre un joueur dans une partie
         boolean ajout = liste.add(j);
         j.inscrit = this;
+        nombre_joueur++;
         return ajout;
 
     }
@@ -45,14 +47,15 @@ public class Partie implements Runnable, Serializable {
         boolean retire = liste.remove(j);
         if (retire) {
             j.inscrit = null;
+            nombre_joueur--;
             return this.id;
         } else {
             return -1;
         }
     }
 
-    public synchronized int nombre_inscrit() {
-        return liste.size();
+    public synchronized byte nombre_inscrit() {
+        return nombre_joueur;
     }
 
     public synchronized ArrayList<Joueur> getList() {
@@ -135,9 +138,13 @@ public class Partie implements Runnable, Serializable {
             }
             start = true;
             System.out.println("la partie commence");
-            ecrit.print("WELCO " + id + " " + labyrinthe.haut + " " + labyrinthe.larg + " " + labyrinthe.nombre_fantome
-                    + " " + address_diffusion + " " + port_diffusion + "***");
-            ecrit.flush();
+            /*
+             * ecrit.print("WELCO " + id + " " + labyrinthe.haut + " " + labyrinthe.larg +
+             * " " + labyrinthe.nombre_fantome
+             * + " " + address_diffusion + " " + port_diffusion + "***");
+             * ecrit.flush();
+             */
+
         } catch (Exception e) {
             e.printStackTrace();
         }

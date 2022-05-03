@@ -1,7 +1,7 @@
 public class Labyrinthe {
 
-    int larg;
-    int haut;
+    short larg;
+    short haut;
     int nombre_fantome;
     char[][] lab;
 
@@ -16,7 +16,7 @@ public class Labyrinthe {
         // je complète plus tard
     }
 
-    public Labyrinthe(int l1, int l2) {
+    public Labyrinthe(short l1, short l2) {
         larg = l1;
         haut = l2;
         lab = new char[l1][l2];
