@@ -2,14 +2,14 @@ public class Labyrinthe {
 
     byte[] larg;
     byte[] haut;
-    int nombre_fantome;
+    byte nombre_fantome;
     char[][] lab;
 
     public Labyrinthe() { // exemple du sujet
         larg = shortToLittleEndian((short) 7);
         haut = shortToLittleEndian((short) 6);
         lab = new char[6][7];
-        nombre_fantome = (6 + 7) / 4;
+        nombre_fantome = (byte) ((6 + 7) / 4);
         // lab[0][0], lab[1][0], lab[2][0], lab[4][0], lab[5][0] = '|';
         // lab[5][1] = '|';
         // lab[0][2], lab[1][2], lab[2][2], lab[3][2], lab[5][2] = '|';
@@ -20,7 +20,7 @@ public class Labyrinthe {
         larg = shortToLittleEndian(l1);
         haut = shortToLittleEndian(l2);
         lab = new char[l1][l2];
-        nombre_fantome = (l1 + l2) / 4;
+        nombre_fantome = (byte) ((l1 + l2) / 4);
     }
 
     public byte[] shortToLittleEndian(short numero) {

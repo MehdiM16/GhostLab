@@ -13,7 +13,7 @@ public class Partie implements Runnable, Serializable {
     boolean start = false;
     Labyrinthe labyrinthe;
     Thread partThread;
-    String address_diffusion;
+    byte[] address_diffusion;
     String port_diffusion;
     Socket sock;
     DatagramSocket dgsock;
@@ -21,7 +21,12 @@ public class Partie implements Runnable, Serializable {
     public Partie() {
         id = id_tot;
         id_tot++;
-        address_diffusion = "225.1.1." + String.valueOf(id);
+        String addr_tmp = "225.1.1." + String.valueOf(id);
+        int taille = addr_tmp.length();
+        for (int i = taille; i < 15; i++) {
+            addr_tmp += '#';
+        }
+        address_diffusion = addr_tmp.getBytes();
         port_diffusion = String.valueOf(8000 + id);
         labyrinthe = new Labyrinthe(); // valeur random pour test si fonctionne bien
         /*

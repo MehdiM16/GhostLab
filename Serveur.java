@@ -323,10 +323,11 @@ public class Serveur {
                     partie_en_cours = true;
                     int larg = moi.inscrit.labyrinthe.littleEndianToInt(moi.inscrit.labyrinthe.larg);
                     int haut = moi.inscrit.labyrinthe.littleEndianToInt(moi.inscrit.labyrinthe.haut);
+                    String addr_tmp = new String(moi.inscrit.address_diffusion);
                     System.out.println("la partie peut commencer");
                     ecrit.print("WELCO " + moi.inscrit.id + " " + haut + " "
                             + larg + " " + moi.inscrit.labyrinthe.nombre_fantome
-                            + " " + moi.inscrit.address_diffusion + " " + moi.inscrit.port_diffusion + "***");
+                            + " " + addr_tmp + " " + moi.inscrit.port_diffusion + "***");
                     ecrit.flush();
                 }
 

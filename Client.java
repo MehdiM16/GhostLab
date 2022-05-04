@@ -178,6 +178,22 @@ public class Client {
         return res;
     }
 
+    public static String lire_addresse_milieu(BufferedReader br) {
+        String res = "";
+        try {
+            char lu = (char) br.read();
+            while (lu != ' ' || res.length() == 0) {
+                if (lu != '#') {
+                    res += lu;
+                }
+                lu = (char) br.read();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return res;
+    }
+
     public static void main(String[] args) {
         try {
             Socket sock = new Socket("localhost", 9999); // ADAPTER POUR LULU
@@ -269,7 +285,7 @@ public class Client {
                 int hauteur = lire_nombre_milieu(lire);
                 int largeur = lire_nombre_milieu(lire);
                 int nb_fantome = lire_nombre_milieu(lire);
-                String ip_partie = lire_pseudo_milieu(lire);
+                String ip_partie = lire_addresse_milieu(lire);
                 int port_dif = lire_nombre_fin(lire);
                 System.out.println("WELCO " + num_partie + " " + hauteur + " " + largeur + " " + nb_fantome + " "
                         + ip_partie + " " + port_dif);

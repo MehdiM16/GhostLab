@@ -10,8 +10,8 @@ public class Joueur implements Runnable, Serializable {
     boolean pret = false;
     Partie inscrit = null;
     Thread joueurThread;
-    int positionX;
-    int positionY;
+    int positionX; // peut etre modifier type et mettre en String de taille 3 !!!! Voir sujet
+    int positionY; // peut etre modifier type et mettre en String de taille 3 !!!! Voir sujet
 
     public Joueur() {
         pseudo = "anonyme0";
