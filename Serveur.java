@@ -114,13 +114,15 @@ public class Serveur {
             }
         }
 
-        public String lire_pseudo_milieu(BufferedReader br) {
+        public String lire_pseudo_milieu(BufferedReader br) { // on lit un string qui se situe au milieu d'un message
             String res = "";
             try {
-                br.read(); // on lit l'espace
+                // br.read(); // on lit l'espace
                 char lu = (char) br.read();
-                while (lu != ' ') {
-                    res += lu;
+                while (lu != ' ' || res.length() == 0) {
+                    if (lu != ' ') { // pour eviter de lire le premier espace
+                        res += lu;
+                    }
                     lu = (char) br.read();
                 }
             } catch (Exception e) {
@@ -376,9 +378,12 @@ public class Serveur {
                     char[] mess_type = new char[5];
                     lire.read(mess_type, 0, 5);
                     String mess = String.valueOf(mess_type);
-
-                    if (mess.equals("UPMOV")) {
-                        String move = lire_pseudo_fin(lire);
+                    System.out.println(mess);
+                    if (mess.equals("UPMOV") || mess.equals("LEMOV") || mess.equals("RIMOV") || mess.equals("DOMOV")) {
+                        String dist = lire_pseudo_fin(lire);
+                        moi.inscrit.joueTour(moi, mess, dist);
+                        ecrit.print("MOVE! " + moi.positionX + " " + moi.positionY + "***");
+                        ecrit.flush();
                     }
                 }
 

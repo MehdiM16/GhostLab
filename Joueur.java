@@ -12,6 +12,7 @@ public class Joueur implements Runnable, Serializable {
     Thread joueurThread;
     String positionX;
     String positionY;
+    String point = "0000";
 
     public Joueur() {
         pseudo = "anonyme0";

@@ -19,8 +19,8 @@ public class Labyrinthe {
     }
 
     public Labyrinthe(short l1, short l2) {
-        larg = shortToLittleEndian(l1);
-        haut = shortToLittleEndian(l2);
+        haut = shortToLittleEndian(l1);
+        larg = shortToLittleEndian(l2);
         lab = new char[l1][l2];
         nombre_fantome = (byte) ((l1 + l2) / 4);
     }

@@ -74,6 +74,26 @@ public class Client {
         }
     }
 
+    public static void lire_mouvement(BufferedReader br) {
+        try {
+            char[] mess = new char[5];
+            br.read(mess, 0, 5);
+            String message = String.valueOf(mess);
+            if (message.equals("MOVE!")) {
+                String posX = lire_pseudo_milieu(br);
+                String posY = lire_pseudo_fin(br);
+                System.out.println(message + " " + posX + " " + posY);
+            } else if (message.equals("MOVEF")) {
+                String posX = lire_pseudo_milieu(br);
+                String posY = lire_pseudo_milieu(br);
+                String score = lire_pseudo_fin(br);
+                System.out.println(message + " " + posX + " " + posY + " " + score);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public static int lire_nombre_fin(BufferedReader br) {
         String fin = "";
         String recu = "";
@@ -210,7 +230,7 @@ public class Client {
             String mess = ""; // correspond au message que le client enverra au serveur
             boolean est_inscrit = false;
             while (!mess.equals("START")) { // PROTOCOLE TCP
-                System.out.println("vous pouvez entrez un message");
+                System.out.println("vous pouvez entrer un message");
                 mess = sc.nextLine();
                 ecrit.print(mess + "***");
                 ecrit.flush();
@@ -302,7 +322,15 @@ public class Client {
             }
 
             while (partie_en_cours) {
+                System.out.println("vous pouvez entrer un message");
+                mess = sc.nextLine();
+                ecrit.print(mess + "***");
+                ecrit.flush();
+                System.out.println(mess);
 
+                if (mess.contains("MOV")) {
+                    lire_mouvement(lire);
+                }
             }
 
             sc.close();

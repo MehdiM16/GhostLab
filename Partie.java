@@ -115,7 +115,7 @@ public class Partie implements Runnable, Serializable {
             return false;
     }
 
-    public void joueTour(Joueur j, String dir, int pas) {
+    public void joueTourbis(Joueur j, String dir, int pas) {
         int posX = Integer.valueOf(j.positionX);
         int posY = Integer.valueOf(j.positionY);
         if (canPlayTour(posX, posY, dir, pas)) {
@@ -132,6 +132,44 @@ public class Partie implements Runnable, Serializable {
                 posY -= pas; // LEMOV
                 j.positionY = j.posIntToString(posY);
             }
+        }
+    }
+
+    public void joueTour(Joueur j, String dir, String pas_s) {
+        int pas = Integer.valueOf(pas_s);
+        int posX = Integer.valueOf(j.positionX);
+        int posY = Integer.valueOf(j.positionY);
+        if (dir.equals("UPMOV")) {
+            // posX -= pas; // UPMOV
+            while (labyrinthe.lab[posX][posY] != '|' && posX > 0 && pas > 0) {
+                posX--;
+                pas--;
+            }
+            j.positionX = j.posIntToString(posX);
+        } else if (dir.equals("RIMOV")) {
+            // posY += pas; // RIMOV
+            while (posY < labyrinthe.littleEndianToInt(labyrinthe.larg) - 1 && labyrinthe.lab[posX][posY] != '|'
+                    && pas > 0) {
+                posY++;
+                pas--;
+                System.out.println("y : " + posY + " , larg : " + labyrinthe.littleEndianToInt(labyrinthe.larg));
+            }
+            j.positionY = j.posIntToString(posY);
+        } else if (dir.equals("DOMOV")) {
+            // posX += pas; // DOMOV
+            while (posX < labyrinthe.littleEndianToInt(labyrinthe.haut) - 1 && labyrinthe.lab[posX][posY] != '|'
+                    && pas > 0) {
+                posX++;
+                pas--;
+            }
+            j.positionX = j.posIntToString(posX);
+        } else if (dir.equals("LEMOV")) {
+            // posY -= pas; // LEMOV
+            while (labyrinthe.lab[posX][posY] != '|' && posY > 0 && pas > 0) {
+                posY--;
+                pas--;
+            }
+            j.positionY = j.posIntToString(posY);
         }
     }
 
