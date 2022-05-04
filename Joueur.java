@@ -10,15 +10,13 @@ public class Joueur implements Runnable, Serializable {
     boolean pret = false;
     Partie inscrit = null;
     Thread joueurThread;
-    int positionX; // peut etre modifier type et mettre en String de taille 3 !!!! Voir sujet
-    int positionY; // peut etre modifier type et mettre en String de taille 3 !!!! Voir sujet
+    String positionX;
+    String positionY;
 
     public Joueur() {
         pseudo = "anonyme0";
         port_udp = -1;
         id = -1;
-        positionX = 0;
-        positionY = 0;
     }
 
     public Joueur(String pseudo, int port) {
@@ -26,8 +24,16 @@ public class Joueur implements Runnable, Serializable {
         port_udp = port;
         this.id = id_tot;
         id_tot++;
-        positionX = 0;
-        positionY = 0;
+    }
+
+    public String posIntToString(int p) {
+        String res = String.valueOf(p);
+        if (res.length() == 1) {
+            res = "00" + res;
+        } else if (res.length() == 2) {
+            res = "0" + res;
+        }
+        return res;
     }
 
     public void sendMessage(String mess) {

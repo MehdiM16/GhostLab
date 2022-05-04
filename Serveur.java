@@ -114,7 +114,7 @@ public class Serveur {
             }
         }
 
-        public String lire_pseudo(BufferedReader br) {
+        public String lire_pseudo_milieu(BufferedReader br) {
             String res = "";
             try {
                 br.read(); // on lit l'espace
@@ -123,6 +123,38 @@ public class Serveur {
                     res += lu;
                     lu = (char) br.read();
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return res;
+        }
+
+        public String lire_pseudo_fin(BufferedReader br) { // on lit un string qui se situe au milieu d'un
+                                                           // message
+            String res = "";
+            String fin = "";
+            boolean prec_etoile = false;
+            try {
+                // br.read(); // on lit l'espace
+                char lu = (char) br.read();
+                while (!fin.equals("***")) {
+                    if (lu == '*') {
+                        fin += lu;
+                        prec_etoile = true;
+                    } else if (lu != ' ') {
+                        if (prec_etoile) { // on arrive dans ce cas si on lit seulement 1 ou 2 etoiles au milieu d'un
+                                           // string
+                            res += fin;
+                            fin = "";
+                        }
+                        res += lu;
+                        prec_etoile = false;
+                    }
+                    if (!fin.equals("***")) {
+                        lu = (char) br.read();
+                    }
+                }
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -204,7 +236,7 @@ public class Serveur {
                     String mess = String.valueOf(mess_type);
                     System.out.println(mess);
                     if (mess.equals("NEWPL")) {
-                        String pseudo = lire_pseudo(lire);
+                        String pseudo = lire_pseudo_milieu(lire);
                         int joueur_port = lire_nombre_fin(lire);
                         System.out.println(pseudo + " " + joueur_port);
                         if (joueur_port != -1) {
@@ -244,7 +276,7 @@ public class Serveur {
                     }
 
                     else if (mess.equals("REGIS")) {
-                        String pseudo = lire_pseudo(lire);
+                        String pseudo = lire_pseudo_milieu(lire);
                         int joueur_port = lire_nombre_milieu(lire);
                         int num_partie = lire_nombre_fin(lire);
                         System.out.println(pseudo + " " + joueur_port + " " + num_partie);
@@ -331,8 +363,23 @@ public class Serveur {
                     ecrit.flush();
                 }
 
-                while (partie_en_cours) {
+                String pos = moi.inscrit.labyrinthe.positionAleatoire();
+                System.out.println(pos);
+                String pos_x = pos.substring(0, 3);
+                String pos_y = pos.substring(3);
+                moi.positionX = pos_x;
+                moi.positionY = pos_y;
+                ecrit.print("POSIT " + moi.pseudo + " " + pos_x + " " + pos_y + "***");
+                ecrit.flush();
 
+                while (partie_en_cours) {
+                    char[] mess_type = new char[5];
+                    lire.read(mess_type, 0, 5);
+                    String mess = String.valueOf(mess_type);
+
+                    if (mess.equals("UPMOV")) {
+                        String move = lire_pseudo_fin(lire);
+                    }
                 }
 
                 lire.close();

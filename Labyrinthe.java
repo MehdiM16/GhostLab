@@ -1,3 +1,5 @@
+import java.util.Random;
+
 public class Labyrinthe {
 
     byte[] larg;
@@ -34,6 +36,27 @@ public class Labyrinthe {
 
     public int littleEndianToInt(byte[] tab) {
         int res = java.nio.ByteBuffer.wrap(tab).order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt();
+        return res;
+    }
+
+    public String positionAleatoire() { // retourne la position sous la forme "XXXXXX" les 3 premier X etant pour la
+                                        // ligne et les 3 suivant pour la colonne
+        int a = new Random().nextInt(littleEndianToInt(haut));
+        int b = new Random().nextInt(littleEndianToInt(larg));
+        while (lab[a][b] == '|') {
+            a = new Random().nextInt(littleEndianToInt(haut));
+            b = new Random().nextInt(littleEndianToInt(larg));
+        }
+        return posIntToString(a) + posIntToString(b);
+    }
+
+    public String posIntToString(int p) {
+        String res = String.valueOf(p);
+        if (res.length() == 1) {
+            res = "00" + res;
+        } else if (res.length() == 2) {
+            res = "0" + res;
+        }
         return res;
     }
 

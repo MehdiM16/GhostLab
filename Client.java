@@ -138,7 +138,9 @@ public class Client {
             // br.read(); // on lit l'espace
             char lu = (char) br.read();
             while (lu != ' ' || res.length() == 0) {
-                res += lu;
+                if (lu != ' ') { // pour eviter de lire le premier espace
+                    res += lu;
+                }
                 lu = (char) br.read();
             }
         } catch (Exception e) {
@@ -158,7 +160,7 @@ public class Client {
                 if (lu == '*') {
                     fin += lu;
                     prec_etoile = true;
-                } else {
+                } else if (lu != ' ') {
                     if (prec_etoile) { // on arrive dans ce cas si on lit seulement 1 ou 2 etoiles au milieu d'un
                                        // string
                         res += fin;
@@ -270,10 +272,8 @@ public class Client {
             }
 
             if (est_inscrit) {
-                System.out.println("je vais lire");
                 lire.read(type_mess, 0, 5);
                 mess_recu = String.valueOf(type_mess);
-                System.out.println("j'ai lu");
             }
 
             MulticastSocket sock_multi;
@@ -292,6 +292,13 @@ public class Client {
                 sock_multi = new MulticastSocket(port_dif);
                 sock_multi.joinGroup(InetAddress.getByName(ip_partie));
                 partie_en_cours = true;
+
+                lire.read(type_mess, 0, 5); // on lit POSIT ...
+                mess_recu = String.valueOf(type_mess);
+                String nom_joueur = lire_pseudo_milieu(lire);
+                String pos_x = lire_pseudo_milieu(lire);
+                String pos_y = lire_pseudo_fin(lire);
+                System.out.println(mess_recu + " " + nom_joueur + " " + pos_x + " " + pos_y);
             }
 
             while (partie_en_cours) {
