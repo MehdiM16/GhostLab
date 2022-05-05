@@ -135,42 +135,72 @@ public class Partie implements Runnable, Serializable {
         }
     }
 
-    public void joueTour(Joueur j, String dir, String pas_s) {
+    public int joueTour(Joueur j, String dir, String pas_s) {
         int pas = Integer.valueOf(pas_s);
         int posX = Integer.valueOf(j.positionX);
         int posY = Integer.valueOf(j.positionY);
+        int fantome_rencontre = 0;
         if (dir.equals("UPMOV")) {
             // posX -= pas; // UPMOV
-            while (labyrinthe.lab[posX][posY] != '|' && posX > 0 && pas > 0) {
+            while (posX > 0 && labyrinthe.getCase(posX - 1, posY) != '|' && pas > 0) {
                 posX--;
                 pas--;
+                if (labyrinthe.getCase(posX, posY) == 'F') {
+                    fantome_rencontre++;
+                    labyrinthe.setCase(posX, posY, 'V');
+                    labyrinthe.remove_fantome(labyrinthe.posIntToString(posX), labyrinthe.posIntToString(posY));
+                }
             }
             j.positionX = j.posIntToString(posX);
         } else if (dir.equals("RIMOV")) {
             // posY += pas; // RIMOV
-            while (posY < labyrinthe.littleEndianToInt(labyrinthe.larg) - 1 && labyrinthe.lab[posX][posY] != '|'
+            while (posY < labyrinthe.littleEndianToInt(labyrinthe.larg) - 1 && labyrinthe.getCase(posX, posY + 1) != '|'
                     && pas > 0) {
                 posY++;
                 pas--;
-                System.out.println("y : " + posY + " , larg : " + labyrinthe.littleEndianToInt(labyrinthe.larg));
+                if (labyrinthe.getCase(posX, posY) == 'F') {
+                    fantome_rencontre++;
+                    labyrinthe.setCase(posX, posY, 'V');
+                    labyrinthe.remove_fantome(labyrinthe.posIntToString(posX), labyrinthe.posIntToString(posY));
+                }
             }
             j.positionY = j.posIntToString(posY);
         } else if (dir.equals("DOMOV")) {
             // posX += pas; // DOMOV
-            while (posX < labyrinthe.littleEndianToInt(labyrinthe.haut) - 1 && labyrinthe.lab[posX][posY] != '|'
+            while (posX < labyrinthe.littleEndianToInt(labyrinthe.haut) - 1 && labyrinthe.getCase(posX + 1, posY) != '|'
                     && pas > 0) {
                 posX++;
                 pas--;
+                if (labyrinthe.getCase(posX, posY) == 'F') {
+                    fantome_rencontre++;
+                    labyrinthe.setCase(posX, posY, 'V');
+                    labyrinthe.remove_fantome(labyrinthe.posIntToString(posX), labyrinthe.posIntToString(posY));
+                }
             }
             j.positionX = j.posIntToString(posX);
         } else if (dir.equals("LEMOV")) {
             // posY -= pas; // LEMOV
-            while (labyrinthe.lab[posX][posY] != '|' && posY > 0 && pas > 0) {
+            while (posY > 0 && labyrinthe.getCase(posX, posY - 1) != '|' && pas > 0) {
                 posY--;
                 pas--;
+                if (labyrinthe.getCase(posX, posY) == 'F') {
+                    fantome_rencontre++;
+                    labyrinthe.setCase(posX, posY, 'V');
+                    labyrinthe.remove_fantome(labyrinthe.posIntToString(posX), labyrinthe.posIntToString(posY));
+                }
             }
             j.positionY = j.posIntToString(posY);
         }
+        return fantome_rencontre;
+    }
+
+    public boolean partie_finis() {
+        for (Fantome f : labyrinthe.liste) {
+            if (!f.attraper) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public void run() {
@@ -188,8 +218,14 @@ public class Partie implements Runnable, Serializable {
             // et peut etre pour les message udp et le multicast, je ne sais pas encore
             // s'il vaut mieux le faire ici ou dans la classe serveur
 
-            while (start) {
-                for (int i = 0; i < labyrinthe.nombre_fantome; i++) {
+            for (Fantome f : labyrinthe.liste) {
+                Thread t = new Thread(f);
+                t.start();
+            }
+
+            while (start && !partie_finis()) {
+                String[] move_possible = { "UPMOV", "RIMOV", "DOMOV", "LEMOV" };
+                for (Fantome f : labyrinthe.liste) {
 
                 }
             }

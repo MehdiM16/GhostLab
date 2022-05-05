@@ -381,8 +381,14 @@ public class Serveur {
                     System.out.println(mess);
                     if (mess.equals("UPMOV") || mess.equals("LEMOV") || mess.equals("RIMOV") || mess.equals("DOMOV")) {
                         String dist = lire_pseudo_fin(lire);
-                        moi.inscrit.joueTour(moi, mess, dist);
-                        ecrit.print("MOVE! " + moi.positionX + " " + moi.positionY + "***");
+                        int rencontre = moi.inscrit.joueTour(moi, mess, dist);
+                        if (rencontre == 0) {
+                            ecrit.print("MOVE! " + moi.positionX + " " + moi.positionY + "***");
+                        } else {
+                            ecrit.print("MOVEF " + moi.positionX + " " + moi.positionY + " " + rencontre * 50 + "***");
+                            // rencontre * 50 = score, a modifier en fonction des resultat lors des test ou
+                            // non
+                        }
                         ecrit.flush();
                     }
                 }

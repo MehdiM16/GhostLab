@@ -3,8 +3,6 @@ import java.util.Random;
 
 public class Labyrinthe {
 
-    int id;
-    static int id_tot = 0;
     byte[] larg;
     byte[] haut;
     byte nombre_fantome;
@@ -25,8 +23,6 @@ public class Labyrinthe {
     }
 
     public Labyrinthe(byte[] addr, String port) {
-        id = id_tot;
-        id_tot++;
         larg = shortToLittleEndian((short) 7);
         haut = shortToLittleEndian((short) 6);
         lab = new char[6][7];
@@ -35,16 +31,14 @@ public class Labyrinthe {
         port_diffusion = port;
         for (int i = 0; i < nombre_fantome; i++) {
             String pos = positionAleatoire();
-            Fantome f = new Fantome(pos.substring(0, 3), pos.substring(3));
-            liste.add(f); // peut etre mettre synchronyzed
-            // System.out.println("lab : " + id + " , fantome : " + f.id);
-        }
-        for (Fantome fe : liste) {
-            System.out.println("lab : " + id + " , fantome : " + fe.id);
+            Fantome f = new Fantome(pos.substring(0, 3), pos.substring(3), addresse_diffusion, port_diffusion, this);
+            liste.add(f); // je ne sais pas encore s'il faut synchronized ici ou non donc peut etre
+                          // modifier par add_fantome()
         }
     }
 
     // On represente les mur par "|" et les fantome par "F"
+    // et les cases vide par un V
     // On pourra definir la position de base des fantome avec la fonction
     // positionAleatoire()
 
@@ -53,6 +47,38 @@ public class Labyrinthe {
         larg = shortToLittleEndian(l2);
         lab = new char[l1][l2];
         nombre_fantome = (byte) ((l1 + l2) / 4);
+    }
+
+    public synchronized void setCase(int x, int y, char c) {
+        try {
+            lab[x][y] = c;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public synchronized char getCase(int x, int y) {
+        try {
+            return lab[x][y];
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ' ';
+    }
+
+    public synchronized void add_fantome(Fantome f) {// peut etre probleme a cause du synchronized, a voir
+                                                     // lors des test
+        liste.add(f);
+    }
+
+    public synchronized void remove_fantome(String x, String y) { // peut etre probleme a cause du synchronized, a voir
+                                                                  // lors des test
+        for (Fantome f : liste) {
+            if (f.positionX.equals(x) && f.positionY.equals(y)) {
+                f.attraper = true;
+                liste.remove(f);
+            }
+        }
     }
 
     public byte[] shortToLittleEndian(short numero) {
