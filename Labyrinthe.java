@@ -1,11 +1,17 @@
+import java.util.ArrayList;
 import java.util.Random;
 
 public class Labyrinthe {
 
+    int id;
+    static int id_tot = 0;
     byte[] larg;
     byte[] haut;
     byte nombre_fantome;
     char[][] lab;
+    ArrayList<Fantome> liste = new ArrayList<Fantome>();
+    byte[] addresse_diffusion;
+    String port_diffusion;
 
     public Labyrinthe() { // exemple du sujet
         larg = shortToLittleEndian((short) 7);
@@ -17,6 +23,30 @@ public class Labyrinthe {
         // lab[0][2], lab[1][2], lab[2][2], lab[3][2], lab[5][2] = '|';
         // je complète plus tard
     }
+
+    public Labyrinthe(byte[] addr, String port) {
+        id = id_tot;
+        id_tot++;
+        larg = shortToLittleEndian((short) 7);
+        haut = shortToLittleEndian((short) 6);
+        lab = new char[6][7];
+        nombre_fantome = (byte) ((6 + 7) / 4);
+        addresse_diffusion = addr;
+        port_diffusion = port;
+        for (int i = 0; i < nombre_fantome; i++) {
+            String pos = positionAleatoire();
+            Fantome f = new Fantome(pos.substring(0, 3), pos.substring(3));
+            liste.add(f); // peut etre mettre synchronyzed
+            // System.out.println("lab : " + id + " , fantome : " + f.id);
+        }
+        for (Fantome fe : liste) {
+            System.out.println("lab : " + id + " , fantome : " + fe.id);
+        }
+    }
+
+    // On represente les mur par "|" et les fantome par "F"
+    // On pourra definir la position de base des fantome avec la fonction
+    // positionAleatoire()
 
     public Labyrinthe(short l1, short l2) {
         haut = shortToLittleEndian(l1);

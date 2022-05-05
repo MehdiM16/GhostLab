@@ -28,7 +28,7 @@ public class Partie implements Runnable, Serializable {
         }
         address_diffusion = addr_tmp.getBytes();
         port_diffusion = String.valueOf(8000 + id);
-        labyrinthe = new Labyrinthe(); // valeur random pour test si fonctionne bien
+        labyrinthe = new Labyrinthe(address_diffusion, port_diffusion); // valeur random pour test si fonctionne bien
         /*
          * try {
          * Socket sock = new Socket("localhost", 9999);
@@ -175,10 +175,6 @@ public class Partie implements Runnable, Serializable {
 
     public void run() {
         try {
-            // BufferedReader lire = new BufferedReader(new
-            // InputStreamReader(sock.getInputStream()));
-            // PrintWriter ecrit = new PrintWriter(new
-            // OutputStreamWriter(sock.getOutputStream()));
             System.out.println("Je suis une partie");
             while (!peut_commencer()) {
                 // System.out.println("tout les joueur ne sont pas pret");
@@ -187,12 +183,16 @@ public class Partie implements Runnable, Serializable {
             }
             start = true;
             System.out.println("la partie commence");
-            /*
-             * ecrit.print("WELCO " + id + " " + labyrinthe.haut + " " + labyrinthe.larg +
-             * " " + labyrinthe.nombre_fantome
-             * + " " + address_diffusion + " " + port_diffusion + "***");
-             * ecrit.flush();
-             */
+            // cette fonction servira principalement pour faire deplacer les fantomes dans
+            // le labyrinthe
+            // et peut etre pour les message udp et le multicast, je ne sais pas encore
+            // s'il vaut mieux le faire ici ou dans la classe serveur
+
+            while (start) {
+                for (int i = 0; i < labyrinthe.nombre_fantome; i++) {
+
+                }
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
