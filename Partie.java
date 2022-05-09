@@ -135,7 +135,7 @@ public class Partie implements Runnable, Serializable {
         }
     }
 
-    public int joueTour(Joueur j, String dir, String pas_s) {
+    public synchronized int joueTour(Joueur j, String dir, String pas_s) {
         int pas = Integer.valueOf(pas_s);
         int posX = Integer.valueOf(j.positionX);
         int posY = Integer.valueOf(j.positionY);

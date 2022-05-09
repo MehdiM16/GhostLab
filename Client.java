@@ -4,6 +4,39 @@ import java.util.Scanner;
 
 public class Client {
 
+    static class Lire_multicast implements Runnable {
+
+        MulticastSocket sock;
+        boolean en_cours = true;
+
+        public Lire_multicast(String addr, int port_d) {
+            try {
+                sock = new MulticastSocket(port_d);
+                sock.joinGroup(InetAddress.getByName(addr));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        public void run() {
+            try {
+                byte[] data = new byte[100];
+                DatagramPacket paquet = new DatagramPacket(data, data.length);
+                while (en_cours) {
+                    sock.receive(paquet);
+                    String recu = new String(paquet.getData(), 0, paquet.getLength());
+                    System.out.println(recu.substring(0, recu.length() - 3));
+                    if (recu.substring(0, 5).equals("ENDGA")) {
+                        en_cours = false;
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
     public static void lire_partie(BufferedReader br, String mess) {
         try {
             int nb_partie = lire_nombre_fin(br);
@@ -309,9 +342,13 @@ public class Client {
                 int port_dif = lire_nombre_fin(lire);
                 System.out.println("WELCO " + num_partie + " " + hauteur + " " + largeur + " " + nb_fantome + " "
                         + ip_partie + " " + port_dif);
-                sock_multi = new MulticastSocket(port_dif);
-                sock_multi.joinGroup(InetAddress.getByName(ip_partie));
+                // sock_multi = new MulticastSocket(port_dif);
+                // sock_multi.joinGroup(InetAddress.getByName(ip_partie));
                 partie_en_cours = true;
+
+                Lire_multicast lecture = new Lire_multicast(ip_partie, port_dif);
+                Thread t_lecture = new Thread(lecture);
+                t_lecture.start();
 
                 lire.read(type_mess, 0, 5); // on lit POSIT ...
                 mess_recu = String.valueOf(type_mess);
@@ -319,17 +356,25 @@ public class Client {
                 String pos_x = lire_pseudo_milieu(lire);
                 String pos_y = lire_pseudo_fin(lire);
                 System.out.println(mess_recu + " " + nom_joueur + " " + pos_x + " " + pos_y);
-            }
 
-            while (partie_en_cours) {
-                System.out.println("vous pouvez entrer un message");
-                mess = sc.nextLine();
-                ecrit.print(mess + "***");
-                ecrit.flush();
-                System.out.println(mess);
+                while (partie_en_cours) {
+                    System.out.println("vous pouvez entrer un message");
+                    mess = sc.nextLine();
+                    ecrit.print(mess + "***");
+                    ecrit.flush();
+                    System.out.println(mess);
 
-                if (mess.contains("MOV")) {
-                    lire_mouvement(lire);
+                    if (mess.contains("MOV")) {
+                        lire_mouvement(lire);
+                    }
+
+                    /*
+                     * byte[] data = new byte[100];
+                     * DatagramPacket paquet = new DatagramPacket(data, data.length);
+                     * sock_multi.receive(paquet);
+                     * String recu = new String(paquet.getData(), 0, paquet.getLength());
+                     * System.out.println(recu.substring(0, recu.length() - 3));
+                     */
                 }
             }
 

@@ -41,7 +41,6 @@ public class Fantome implements Runnable {
     }
 
     public void deplacement(String move, int dist) {
-        char[][] grille = labyrinthe.lab;
         int posX = Integer.valueOf(positionX);
         int posY = Integer.valueOf(positionY);
         if (move.equals("UPMOV")) {
@@ -103,10 +102,11 @@ public class Fantome implements Runnable {
                     Integer.valueOf(port_diffusion));
             String[] move_possible = { "UPMOV", "RIMOV", "DOMOV", "LEMOV" };
             while (!attraper) {
-                Thread.sleep(vitesse * 2000);
+                // Thread.sleep(vitesse * 2000);
+                Thread.sleep(20000);
                 int choix = new Random().nextInt(4);
                 deplacement(move_possible[choix], vitesse);
-                String a_envoyer = "GHOST " + positionX + " " + positionY + "+++";
+                String a_envoyer = "GHOST id : " + id + " " + positionX + " " + positionY + "+++";
                 data = a_envoyer.getBytes();
                 DatagramPacket message = new DatagramPacket(data, data.length, dest);
                 sock_envoie.send(message);

@@ -67,12 +67,12 @@ public class Labyrinthe {
     }
 
     public synchronized void add_fantome(Fantome f) {// peut etre probleme a cause du synchronized, a voir
-                                                     // lors des test
+        // lors des test
         liste.add(f);
     }
 
     public synchronized void remove_fantome(String x, String y) { // peut etre probleme a cause du synchronized, a voir
-                                                                  // lors des test
+        // lors des test
         for (Fantome f : liste) {
             if (f.positionX.equals(x) && f.positionY.equals(y)) {
                 f.attraper = true;
@@ -99,7 +99,7 @@ public class Labyrinthe {
                                         // ligne et les 3 suivant pour la colonne
         int a = new Random().nextInt(littleEndianToInt(haut));
         int b = new Random().nextInt(littleEndianToInt(larg));
-        while (lab[a][b] == '|') {
+        while (lab[a][b] == '|' || lab[a][b] == 'F') {
             a = new Random().nextInt(littleEndianToInt(haut));
             b = new Random().nextInt(littleEndianToInt(larg));
         }
