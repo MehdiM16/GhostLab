@@ -37,6 +37,18 @@ public class Joueur implements Runnable, Serializable {
         return res;
     }
 
+    public String scoreToString(int p) {
+        String res = String.valueOf(p);
+        if (res.length() == 1) {
+            res = "000" + res;
+        } else if (res.length() == 2) {
+            res = "00" + res;
+        } else if (res.length() == 3) {
+            res = "0" + res;
+        }
+        return res;
+    }
+
     public void sendMessage(String mess) {
         try {
             DatagramSocket ds = new DatagramSocket(); // pour envoyer

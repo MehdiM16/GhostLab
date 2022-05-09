@@ -66,18 +66,25 @@ public class Labyrinthe {
         return ' ';
     }
 
-    public synchronized void add_fantome(Fantome f) {// peut etre probleme a cause du synchronized, a voir
+    public void add_fantome(Fantome f) {// peut etre probleme a cause du synchronized, a voir
         // lors des test
         liste.add(f);
     }
 
     public synchronized void remove_fantome(String x, String y) { // peut etre probleme a cause du synchronized, a voir
         // lors des test
-        for (Fantome f : liste) {
-            if (f.positionX.equals(x) && f.positionY.equals(y)) {
-                f.attraper = true;
-                liste.remove(f);
+        try {
+            Fantome a_supprimer = new Fantome();
+            for (Fantome f : liste) {
+                if (f.positionX.equals(x) && f.positionY.equals(y)) {
+                    f.attraper = true;
+                    // liste.remove(f);
+                    a_supprimer = f;
+                }
             }
+            liste.remove(a_supprimer);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

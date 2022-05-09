@@ -29,14 +29,11 @@ public class Partie implements Runnable, Serializable {
         address_diffusion = addr_tmp.getBytes();
         port_diffusion = String.valueOf(8000 + id);
         labyrinthe = new Labyrinthe(address_diffusion, port_diffusion); // valeur random pour test si fonctionne bien
-        /*
-         * try {
-         * Socket sock = new Socket("localhost", 9999);
-         * DatagramSocket dgsock = new DatagramSocket();
-         * } catch (Exception e) {
-         * e.printStackTrace();
-         * }
-         */
+        try {
+            dgsock = new DatagramSocket();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public synchronized boolean enregistre_joueur(Joueur j) { // enregistre un joueur dans une partie
@@ -149,6 +146,7 @@ public class Partie implements Runnable, Serializable {
                     fantome_rencontre++;
                     labyrinthe.setCase(posX, posY, 'V');
                     labyrinthe.remove_fantome(labyrinthe.posIntToString(posX), labyrinthe.posIntToString(posY));
+                    joueur_prend_fantome(j);
                 }
             }
             j.positionX = j.posIntToString(posX);
@@ -162,6 +160,7 @@ public class Partie implements Runnable, Serializable {
                     fantome_rencontre++;
                     labyrinthe.setCase(posX, posY, 'V');
                     labyrinthe.remove_fantome(labyrinthe.posIntToString(posX), labyrinthe.posIntToString(posY));
+                    joueur_prend_fantome(j);
                 }
             }
             j.positionY = j.posIntToString(posY);
@@ -175,6 +174,7 @@ public class Partie implements Runnable, Serializable {
                     fantome_rencontre++;
                     labyrinthe.setCase(posX, posY, 'V');
                     labyrinthe.remove_fantome(labyrinthe.posIntToString(posX), labyrinthe.posIntToString(posY));
+                    joueur_prend_fantome(j);
                 }
             }
             j.positionX = j.posIntToString(posX);
@@ -187,6 +187,7 @@ public class Partie implements Runnable, Serializable {
                     fantome_rencontre++;
                     labyrinthe.setCase(posX, posY, 'V');
                     labyrinthe.remove_fantome(labyrinthe.posIntToString(posX), labyrinthe.posIntToString(posY));
+                    joueur_prend_fantome(j);
                 }
             }
             j.positionY = j.posIntToString(posY);
@@ -201,6 +202,42 @@ public class Partie implements Runnable, Serializable {
             }
         }
         return true;
+    }
+
+    public String byteArrayToString(byte[] tab) {
+        String tmp = new String(tab);
+        String res = "";
+        for (int i = 0; i < tmp.length(); i++) {
+            if (tmp.charAt(i) != '#') {
+                res += tmp.charAt(i);
+            }
+        }
+        return res;
+    }
+
+    public void joueur_prend_fantome(Joueur j) {
+        try {
+            byte[] data;
+            InetSocketAddress dest = new InetSocketAddress(byteArrayToString(address_diffusion),
+                    Integer.valueOf(port_diffusion));
+            String a_envoyer = "SCORE " + j.pseudo + " " + j.point + " " + j.positionX + " " + j.positionY + "+++";
+            data = a_envoyer.getBytes();
+            DatagramPacket message = new DatagramPacket(data, data.length, dest);
+            dgsock.send(message);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Joueur gagnant() {
+        Joueur res = new Joueur();
+        int score = Integer.valueOf(res.point);
+        for (Joueur j : liste) {
+            if (Integer.valueOf(j.point) > score) {
+                res = j;
+            }
+        }
+        return res;
     }
 
     public void run() {
@@ -225,10 +262,26 @@ public class Partie implements Runnable, Serializable {
 
             while (start && !partie_finis()) {
                 String[] move_possible = { "UPMOV", "RIMOV", "DOMOV", "LEMOV" };
-                for (Fantome f : labyrinthe.liste) {
-
+                /*
+                 * for (Fantome f : labyrinthe.liste) {
+                 * 
+                 * }
+                 */
+                if (partie_finis()) {
+                    start = false;
                 }
             }
+
+            Joueur a_gagner = gagnant();
+            byte[] data;
+            InetSocketAddress dest = new InetSocketAddress(byteArrayToString(address_diffusion),
+                    Integer.valueOf(port_diffusion));
+            String a_envoyer = "ENDGA " + a_gagner.pseudo + " " + a_gagner.point + "+++";
+            data = a_envoyer.getBytes();
+            DatagramPacket message = new DatagramPacket(data, data.length, dest);
+            dgsock.send(message);
+
+            // !!!! Voir en cas de 2 joueur qui ont le meme score
 
         } catch (Exception e) {
             e.printStackTrace();
