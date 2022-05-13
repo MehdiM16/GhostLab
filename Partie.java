@@ -63,6 +63,15 @@ public class Partie implements Runnable, Serializable {
         return liste;
     }
 
+    public synchronized boolean partie_finis() {
+        for (Fantome f : labyrinthe.liste) {
+            if (!f.attraper) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public boolean peut_commencer() {
         for (Joueur j : liste) {
             if (!j.pret)
@@ -145,7 +154,7 @@ public class Partie implements Runnable, Serializable {
                 if (labyrinthe.getCase(posX, posY) == 'F') {
                     fantome_rencontre++;
                     labyrinthe.setCase(posX, posY, 'V');
-                    labyrinthe.remove_fantome(labyrinthe.posIntToString(posX), labyrinthe.posIntToString(posY));
+                    labyrinthe.remove_fantome(j, labyrinthe.posIntToString(posX), labyrinthe.posIntToString(posY));
                     joueur_prend_fantome(j);
                 }
             }
@@ -159,7 +168,7 @@ public class Partie implements Runnable, Serializable {
                 if (labyrinthe.getCase(posX, posY) == 'F') {
                     fantome_rencontre++;
                     labyrinthe.setCase(posX, posY, 'V');
-                    labyrinthe.remove_fantome(labyrinthe.posIntToString(posX), labyrinthe.posIntToString(posY));
+                    labyrinthe.remove_fantome(j, labyrinthe.posIntToString(posX), labyrinthe.posIntToString(posY));
                     joueur_prend_fantome(j);
                 }
             }
@@ -173,7 +182,7 @@ public class Partie implements Runnable, Serializable {
                 if (labyrinthe.getCase(posX, posY) == 'F') {
                     fantome_rencontre++;
                     labyrinthe.setCase(posX, posY, 'V');
-                    labyrinthe.remove_fantome(labyrinthe.posIntToString(posX), labyrinthe.posIntToString(posY));
+                    labyrinthe.remove_fantome(j, labyrinthe.posIntToString(posX), labyrinthe.posIntToString(posY));
                     joueur_prend_fantome(j);
                 }
             }
@@ -186,22 +195,13 @@ public class Partie implements Runnable, Serializable {
                 if (labyrinthe.getCase(posX, posY) == 'F') {
                     fantome_rencontre++;
                     labyrinthe.setCase(posX, posY, 'V');
-                    labyrinthe.remove_fantome(labyrinthe.posIntToString(posX), labyrinthe.posIntToString(posY));
+                    labyrinthe.remove_fantome(j, labyrinthe.posIntToString(posX), labyrinthe.posIntToString(posY));
                     joueur_prend_fantome(j);
                 }
             }
             j.positionY = j.posIntToString(posY);
         }
         return fantome_rencontre;
-    }
-
-    public boolean partie_finis() {
-        for (Fantome f : labyrinthe.liste) {
-            if (!f.attraper) {
-                return false;
-            }
-        }
-        return true;
     }
 
     public String byteArrayToString(byte[] tab) {
@@ -272,6 +272,7 @@ public class Partie implements Runnable, Serializable {
                 }
             }
 
+            System.out.println("la partie est terminé");
             Joueur a_gagner = gagnant();
             byte[] data;
             InetSocketAddress dest = new InetSocketAddress(byteArrayToString(address_diffusion),

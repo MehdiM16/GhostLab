@@ -114,6 +114,7 @@ public class Fantome implements Runnable {
                 // Thread.sleep(vitesse * 2000);
                 Thread.sleep(20000);
             }
+            System.out.println("je suis le fantome " + id + " et j'ai finis");
 
             sock_envoie.close();
         } catch (Exception e) {

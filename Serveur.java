@@ -385,9 +385,11 @@ public class Serveur {
                         if (rencontre == 0) {
                             ecrit.print("MOVE! " + moi.positionX + " " + moi.positionY + "***");
                         } else {
-                            int mon_score = Integer.valueOf(moi.point);
-                            int new_score = mon_score + (rencontre * 50);
-                            moi.point = String.valueOf(moi.scoreToString(new_score));
+                            /*
+                             * int mon_score = Integer.valueOf(moi.point);
+                             * int new_score = mon_score + (rencontre * 50);
+                             * moi.point = String.valueOf(moi.scoreToString(new_score));
+                             */
                             ecrit.print("MOVEF " + moi.positionX + " " + moi.positionY + " " + moi.point + "***");
                             // rencontre * 50 = score, a modifier en fonction des resultat lors des test ou
                             // non

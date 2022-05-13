@@ -18,6 +18,10 @@ public class Client {
             }
         }
 
+        public boolean getEnCours() {
+            return en_cours;
+        }
+
         public void run() {
             try {
                 byte[] data = new byte[100];
@@ -28,6 +32,7 @@ public class Client {
                     System.out.println(recu.substring(0, recu.length() - 3));
                     if (recu.substring(0, 5).equals("ENDGA")) {
                         en_cours = false;
+                        System.out.println("nous sommes cense avoir finis");
                     }
                 }
             } catch (Exception e) {
@@ -329,7 +334,7 @@ public class Client {
                 mess_recu = String.valueOf(type_mess);
             }
 
-            MulticastSocket sock_multi;
+            // MulticastSocket sock_multi;
 
             boolean partie_en_cours = false;
 
@@ -367,14 +372,10 @@ public class Client {
                     if (mess.contains("MOV")) {
                         lire_mouvement(lire);
                     }
-
-                    /*
-                     * byte[] data = new byte[100];
-                     * DatagramPacket paquet = new DatagramPacket(data, data.length);
-                     * sock_multi.receive(paquet);
-                     * String recu = new String(paquet.getData(), 0, paquet.getLength());
-                     * System.out.println(recu.substring(0, recu.length() - 3));
-                     */
+                    if (!lecture.getEnCours()) {
+                        partie_en_cours = false;
+                        System.out.println("on arrive a la fin");
+                    }
                 }
             }
 

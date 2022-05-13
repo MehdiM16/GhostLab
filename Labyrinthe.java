@@ -71,14 +71,17 @@ public class Labyrinthe {
         liste.add(f);
     }
 
-    public synchronized void remove_fantome(String x, String y) { // peut etre probleme a cause du synchronized, a voir
+    public synchronized void remove_fantome(Joueur j, String x, String y) { // peut etre probleme a cause du
+                                                                            // synchronized, a voir
         // lors des test
         try {
             Fantome a_supprimer = new Fantome();
             for (Fantome f : liste) {
                 if (f.positionX.equals(x) && f.positionY.equals(y)) {
                     f.attraper = true;
-                    // liste.remove(f);
+                    int mon_score = Integer.valueOf(j.point);
+                    int new_score = mon_score + 50;
+                    j.point = String.valueOf(j.scoreToString(new_score));
                     a_supprimer = f;
                 }
             }
