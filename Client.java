@@ -18,10 +18,6 @@ public class Client {
             }
         }
 
-        public boolean getEnCours() {
-            return en_cours;
-        }
-
         public void run() {
             try {
                 byte[] data = new byte[100];
@@ -32,7 +28,6 @@ public class Client {
                     System.out.println(recu.substring(0, recu.length() - 3));
                     if (recu.substring(0, 5).equals("ENDGA")) {
                         en_cours = false;
-                        System.out.println("nous sommes cense avoir finis");
                     }
                 }
             } catch (Exception e) {
@@ -112,11 +107,8 @@ public class Client {
         }
     }
 
-    public static void lire_mouvement(BufferedReader br) {
+    public static void lire_mouvement(BufferedReader br, String message) {
         try {
-            char[] mess = new char[5];
-            br.read(mess, 0, 5);
-            String message = String.valueOf(mess);
             if (message.equals("MOVE!")) {
                 String posX = lire_pseudo_milieu(br);
                 String posY = lire_pseudo_fin(br);
@@ -126,6 +118,25 @@ public class Client {
                 String posY = lire_pseudo_milieu(br);
                 String score = lire_pseudo_fin(br);
                 System.out.println(message + " " + posX + " " + posY + " " + score);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void lire_joueur_partie(BufferedReader br) {
+        try {
+            int nb_joueur = lire_nombre_fin(br);
+            for (int i = 0; i < nb_joueur; i++) {
+                char[] joueur_i = new char[5];
+                br.read(joueur_i, 0, 5);
+                String joueur_s = String.valueOf(joueur_i);
+                // br.read();// on lit l'espace
+                String pseudo = lire_pseudo_milieu(br);
+                String posX = lire_pseudo_milieu(br);
+                String posY = lire_pseudo_milieu(br);
+                String score = lire_pseudo_fin(br);
+                System.out.println(joueur_s + " " + pseudo + " " + posX + " " + posY + " " + score);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -369,13 +380,24 @@ public class Client {
                     ecrit.flush();
                     System.out.println(mess);
 
-                    if (mess.contains("MOV")) {
-                        lire_mouvement(lire);
-                    }
-                    if (!lecture.getEnCours()) {
+                    lire.read(type_mess, 0, 5);
+                    mess_recu = String.valueOf(type_mess);
+
+                    if (mess_recu.equals("GOBYE")) {
                         partie_en_cours = false;
-                        System.out.println("on arrive a la fin");
+                        lire.read();
+                        lire.read();
+                        lire.read();// on lit les ***
                     }
+
+                    if (mess.contains("MOV") && (mess_recu.equals("MOVE!") || mess_recu.equals("MOVEF"))) {
+                        lire_mouvement(lire, mess_recu);
+                    }
+
+                    else if (mess.contains("GLIS?") && (mess_recu.equals("GLIS!"))) {
+                        lire_joueur_partie(lire);
+                    }
+
                 }
             }
 
