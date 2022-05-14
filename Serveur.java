@@ -75,6 +75,25 @@ public class Serveur {
             }
         }
 
+        public void liste_joueur_partie(BufferedReader br, PrintWriter pw, Joueur j) {
+            try {
+                br.read();
+                br.read();
+                br.read(); // on lit les ***
+                if (j.inscrit != null && j.inscrit.start) {
+                    pw.print("GLIS! " + j.inscrit.nombre_inscrit() + "***");
+                    for (Joueur tmp : j.inscrit.getList()) {
+                        pw.print("GPLYR " + tmp.pseudo + " " + tmp.positionX + " " + tmp.positionY + " " + tmp.point
+                                + "***");
+                    }
+                    pw.flush();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }
+
         public void taille_labyrinthe(PrintWriter pw, BufferedReader br) {
             int num_partie = lire_nombre_fin(br);
             if (num_partie == -1) {
@@ -131,8 +150,9 @@ public class Serveur {
             return res;
         }
 
-        public String lire_pseudo_fin(BufferedReader br) { // on lit un string qui se situe au milieu d'un
-                                                           // message
+        public String lire_pseudo_fin(BufferedReader br, boolean est_mess) { // on lit un string qui se situe au milieu
+                                                                             // d'un
+            // message
             String res = "";
             String fin = "";
             boolean prec_etoile = false;
@@ -143,7 +163,7 @@ public class Serveur {
                     if (lu == '*') {
                         fin += lu;
                         prec_etoile = true;
-                    } else if (lu != ' ') {
+                    } else if (lu != ' ' || est_mess) {
                         if (prec_etoile) { // on arrive dans ce cas si on lit seulement 1 ou 2 etoiles au milieu d'un
                                            // string
                             res += fin;
@@ -379,19 +399,49 @@ public class Serveur {
                     lire.read(mess_type, 0, 5);
                     String mess = String.valueOf(mess_type);
                     System.out.println(mess);
-                    if (mess.equals("UPMOV") || mess.equals("LEMOV") || mess.equals("RIMOV") || mess.equals("DOMOV")) {
-                        String dist = lire_pseudo_fin(lire);
-                        int rencontre = moi.inscrit.joueTour(moi, mess, dist);
-                        if (rencontre == 0) {
-                            ecrit.print("MOVE! " + moi.positionX + " " + moi.positionY + "***");
-                        } else {
-                            ecrit.print("MOVEF " + moi.positionX + " " + moi.positionY + " " + moi.point + "***");
+                    if (!moi.inscrit.partie_finis()) {
+                        if (mess.equals("UPMOV") || mess.equals("LEMOV") || mess.equals("RIMOV")
+                                || mess.equals("DOMOV")) {
+                            String dist = lire_pseudo_fin(lire, false);
+                            int rencontre = moi.inscrit.joueTour(moi, mess, dist);
+                            if (rencontre == 0) {
+                                ecrit.print("MOVE! " + moi.positionX + " " + moi.positionY + "***");
+                            } else {
+                                ecrit.print("MOVEF " + moi.positionX + " " + moi.positionY + " " + moi.point + "***");
+                            }
+                            ecrit.flush();
                         }
-                        ecrit.flush();
-                    }
 
-                    if (!moi.inscrit.start) {
+                        else if (mess.equals("GLIS?")) {
+                            liste_joueur_partie(lire, ecrit, moi);
+                        }
+
+                        else if (mess.equals("MALL?")) {
+                            String envoie_message = lire_pseudo_fin(lire, true);
+                            System.out.println(envoie_message);
+                            ecrit.print("MALL!***");
+                            ecrit.flush();
+                            moi.inscrit.multidiffuse_message(moi, envoie_message);
+                        }
+
+                        else if (mess.equals("SEND?")) {
+                            String destinataire = lire_pseudo_milieu(lire);
+                            String envoie_message = lire_pseudo_fin(lire, true);
+                            boolean message_envoyer = moi.inscrit.envoie_message_joueur(moi, destinataire,
+                                    envoie_message);
+                            if (message_envoyer) {
+                                ecrit.print("SEND!***");
+                            } else {
+                                ecrit.print("NSEND***");
+                            }
+                            ecrit.flush();
+                        }
+
+                    } else {
                         partie_en_cours = false;
+                        ecrit.print("GOBYE***");
+                        ecrit.flush();
+
                     }
                 }
 

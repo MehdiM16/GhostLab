@@ -4,15 +4,19 @@ import java.util.Scanner;
 
 public class Client {
 
-    static class Lire_multicast implements Runnable {
+    static class Lire_multicast_udp implements Runnable {
 
         MulticastSocket sock;
         boolean en_cours = true;
+        DatagramSocket data_sock;
 
-        public Lire_multicast(String addr, int port_d) {
+        public Lire_multicast_udp(String addr, int port_d, int port_d2) {
             try {
                 sock = new MulticastSocket(port_d);
                 sock.joinGroup(InetAddress.getByName(addr));
+                if (port_d2 != -1) {
+                    data_sock = new DatagramSocket(port_d2);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -20,9 +24,19 @@ public class Client {
 
         public void run() {
             try {
-                byte[] data = new byte[100];
+                byte[] data = new byte[230];
+                byte[] data2 = new byte[230];
                 DatagramPacket paquet = new DatagramPacket(data, data.length);
                 while (en_cours) {
+                    // recoit message udp
+                    DatagramPacket paquet2 = new DatagramPacket(data2, data2.length);
+                    data_sock.receive(paquet2);
+                    String st = new String(paquet2.getData(), 0, paquet2.getLength());
+                    System.out.println(st);
+                    // voir si probleme de blocage des message multicast si aucun message udp est
+                    // recu
+
+                    // recoit message multicast
                     sock.receive(paquet);
                     String recu = new String(paquet.getData(), 0, paquet.getLength());
                     System.out.println(recu.substring(0, recu.length() - 3));
@@ -69,17 +83,18 @@ public class Client {
                 br.read();
                 br.read();
                 br.read(); // on lit les *** pour lire entierement le message
-            }
-            int num_partie = lire_nombre_milieu(br);
-            int nb_joueur = lire_nombre_fin(br);
-            System.out.println(rep + " " + num_partie + " " + nb_joueur);
-            for (int i = 0; i < nb_joueur; i++) {
-                char[] joueur_i = new char[5];
-                br.read(joueur_i, 0, 5);
-                String joueur_s = String.valueOf(joueur_i);
-                br.read();// on lit l'espace
-                String pseudo = lire_pseudo_fin(br);
-                System.out.println(joueur_s + " " + pseudo);
+            } else {
+                int num_partie = lire_nombre_milieu(br);
+                int nb_joueur = lire_nombre_fin(br);
+                System.out.println(rep + " " + num_partie + " " + nb_joueur);
+                for (int i = 0; i < nb_joueur; i++) {
+                    char[] joueur_i = new char[5];
+                    br.read(joueur_i, 0, 5);
+                    String joueur_s = String.valueOf(joueur_i);
+                    br.read();// on lit l'espace
+                    String pseudo = lire_pseudo_fin(br);
+                    System.out.println(joueur_s + " " + pseudo);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -127,6 +142,7 @@ public class Client {
     public static void lire_joueur_partie(BufferedReader br) {
         try {
             int nb_joueur = lire_nombre_fin(br);
+            System.out.println(" " + nb_joueur);
             for (int i = 0; i < nb_joueur; i++) {
                 char[] joueur_i = new char[5];
                 br.read(joueur_i, 0, 5);
@@ -265,12 +281,34 @@ public class Client {
         return res;
     }
 
+    public static int recup_port(String message) {
+        String port = "";
+        boolean espace_lu = false;
+        for (int i = 6; i < message.length(); i++) {
+            char tmp = message.charAt(i);
+            if (Character.isDigit(tmp) && espace_lu) {
+                port += tmp;
+            } else if (tmp == ' ') {
+                if (espace_lu) {
+                    break;
+                    // si on arrive ici c'est que on lit un espace une deuxieme fois et que donc on
+                    // a finis de lire le port
+                } else {
+                    espace_lu = true;
+                }
+            }
+        }
+        return Integer.valueOf(port);
+    }
+
     public static void main(String[] args) {
         try {
             Socket sock = new Socket("localhost", 9999); // ADAPTER POUR LULU
             BufferedReader lire = new BufferedReader(new InputStreamReader(sock.getInputStream()));
             PrintWriter ecrit = new PrintWriter(new OutputStreamWriter(sock.getOutputStream()));
             Scanner sc = new Scanner(System.in);
+
+            int port_udp = -1;
 
             char[] type_mess = new char[5];
             lire.read(type_mess, 0, 5);
@@ -313,6 +351,7 @@ public class Client {
                 }
 
                 else if (mess.contains("REGIS") || mess.contains("NEWPL")) {
+                    port_udp = recup_port(mess);
                     lire.read(type_mess, 0, 5);
                     mess_recu = String.valueOf(type_mess);
                     if (mess_recu.equals("REGNO")) {
@@ -362,7 +401,7 @@ public class Client {
                 // sock_multi.joinGroup(InetAddress.getByName(ip_partie));
                 partie_en_cours = true;
 
-                Lire_multicast lecture = new Lire_multicast(ip_partie, port_dif);
+                Lire_multicast_udp lecture = new Lire_multicast_udp(ip_partie, port_dif, port_udp);
                 Thread t_lecture = new Thread(lecture);
                 t_lecture.start();
 
@@ -384,21 +423,40 @@ public class Client {
                     mess_recu = String.valueOf(type_mess);
 
                     if (mess_recu.equals("GOBYE")) {
+                        System.out.println(mess_recu);
                         partie_en_cours = false;
                         lire.read();
                         lire.read();
                         lire.read();// on lit les ***
-                    }
+                    } else {
 
-                    if (mess.contains("MOV") && (mess_recu.equals("MOVE!") || mess_recu.equals("MOVEF"))) {
-                        lire_mouvement(lire, mess_recu);
-                    }
+                        if (mess.contains("MOV") && (mess_recu.equals("MOVE!") || mess_recu.equals("MOVEF"))) {
+                            lire_mouvement(lire, mess_recu);
+                        }
 
-                    else if (mess.contains("GLIS?") && (mess_recu.equals("GLIS!"))) {
-                        lire_joueur_partie(lire);
-                    }
+                        else if (mess.contains("GLIS?") && (mess_recu.equals("GLIS!"))) {
+                            System.out.print(mess_recu);
+                            lire_joueur_partie(lire);
+                        }
 
+                        else if (mess.contains("MALL?")) {
+                            System.out.println(mess_recu);
+                            lire.read();
+                            lire.read();
+                            lire.read(); // on lit les ***
+                        }
+
+                        else if (mess.contains("SEND?")) {
+                            System.out.println(mess_recu);
+                            lire.read();
+                            lire.read();
+                            lire.read(); // on lit les ***
+                        }
+
+                    }
                 }
+
+                System.out.println("le client est sorti du while");
             }
 
             sc.close();

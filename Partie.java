@@ -72,73 +72,21 @@ public class Partie implements Runnable, Serializable {
         return true;
     }
 
-    public boolean peut_commencer() {
+    public synchronized Joueur getJoueur(String nom) {
+        for (Joueur tmp : liste) {
+            if (tmp.pseudo.equals(nom)) {
+                return tmp;
+            }
+        }
+        return null;
+    }
+
+    public synchronized boolean peut_commencer() {
         for (Joueur j : liste) {
             if (!j.pret)
                 return false;
         }
         return true;
-    }
-
-    public boolean canPlayTour(int posX, int posY, String dir, int pas) {
-        char[][] grille = labyrinthe.lab;
-        int largeur = labyrinthe.littleEndianToInt(labyrinthe.larg);
-        int hauteur = labyrinthe.littleEndianToInt(labyrinthe.haut);
-
-        if (dir.equals("UPMOV")) { // UPMOV
-            if (posX - pas < 0)
-                return false;
-            for (int i = posX - 1; i >= posX - 1 - pas; i--) {
-                if (grille[i][posY] == '|')
-                    return false;
-            }
-            return true;
-        } else if (dir.equals("RIMOV")) { // RIMOV
-            if (posY + pas >= largeur)
-                return false;
-            for (int i = posY + 1; i < posY + 1 + pas; i++) {
-                if (grille[posX][i] == '|')
-                    return false;
-            }
-            return true;
-        } else if (dir.equals("DOMOV")) { // DOMOV
-            if (posX + pas >= hauteur)
-                return false;
-            for (int i = posX + 1; i < posX + 1 + pas; i++) {
-                if (grille[i][posY] == '|')
-                    return false;
-            }
-            return true;
-        } else if (dir.equals("LEMOV")) { // LEMOV
-            if (posY - pas < 0)
-                return false;
-            for (int i = posY - 1; i >= posY - pas; i--) {
-                if (grille[posX][i] == '|')
-                    return false;
-            }
-            return true;
-        } else
-            return false;
-    }
-
-    public void joueTourbis(Joueur j, String dir, int pas) {
-        int posX = Integer.valueOf(j.positionX);
-        int posY = Integer.valueOf(j.positionY);
-        if (canPlayTour(posX, posY, dir, pas)) {
-            if (dir.equals("UPMOV")) {
-                posX -= pas; // UPMOV
-                j.positionX = j.posIntToString(posX);
-            } else if (dir.equals("RIMOV")) {
-                posY += pas; // RIMOV
-                j.positionY = j.posIntToString(posY);
-            } else if (dir.equals("DOMOV")) {
-                posX += pas; // DOMOV
-                j.positionX = j.posIntToString(posX);
-            } else if (dir.equals("LEMOV")) {
-                posY -= pas; // LEMOV
-                j.positionY = j.posIntToString(posY);
-            }
-        }
     }
 
     public synchronized int joueTour(Joueur j, String dir, String pas_s) {
@@ -240,6 +188,42 @@ public class Partie implements Runnable, Serializable {
         return res;
     }
 
+    public void multidiffuse_message(Joueur j, String message) {
+        try {
+            byte[] data;
+            InetSocketAddress dest = new InetSocketAddress(byteArrayToString(address_diffusion),
+                    Integer.valueOf(port_diffusion));
+            String a_envoyer = "MESSA " + j.pseudo + " " + message + "+++";
+            data = a_envoyer.getBytes();
+            DatagramPacket paquet = new DatagramPacket(data, data.length, dest);
+            dgsock.send(paquet);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public boolean envoie_message_joueur(Joueur envoyeur, String destinataire, String message) {
+        boolean res = false;
+        try {
+            Joueur objectif = getJoueur(destinataire);
+            if (objectif == null) {
+                res = false;
+            } else {
+                DatagramSocket dso = new DatagramSocket();
+                byte[] data;
+                String a_envoyer = "MESSP " + envoyeur.pseudo + " " + message + "+++";
+                data = a_envoyer.getBytes();
+                InetSocketAddress ia = new InetSocketAddress("localhost", objectif.port_udp);
+                DatagramPacket paquet = new DatagramPacket(data, data.length, ia);
+                dso.send(paquet);
+                res = true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return res;
+    }
+
     public void run() {
         try {
             System.out.println("Je suis une partie");
@@ -261,15 +245,6 @@ public class Partie implements Runnable, Serializable {
             }
 
             while (start && !partie_finis()) {
-                String[] move_possible = { "UPMOV", "RIMOV", "DOMOV", "LEMOV" };
-                /*
-                 * for (Fantome f : labyrinthe.liste) {
-                 * 
-                 * }
-                 */
-                if (partie_finis()) {
-                    start = false;
-                }
             }
 
             System.out.println("la partie est terminé");

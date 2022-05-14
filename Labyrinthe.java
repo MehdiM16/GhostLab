@@ -109,7 +109,7 @@ public class Labyrinthe {
                                         // ligne et les 3 suivant pour la colonne
         int a = new Random().nextInt(littleEndianToInt(haut));
         int b = new Random().nextInt(littleEndianToInt(larg));
-        while (lab[a][b] == '|' || lab[a][b] == 'F') {
+        while (lab[a][b] == '|' || lab[a][b] == 'F' || lab[a][b] == 'J') {
             a = new Random().nextInt(littleEndianToInt(haut));
             b = new Random().nextInt(littleEndianToInt(larg));
         }
