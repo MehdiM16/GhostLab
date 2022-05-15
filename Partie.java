@@ -183,6 +183,7 @@ public class Partie implements Runnable, Serializable {
         for (Joueur j : liste) {
             if (Integer.valueOf(j.point) > score) {
                 res = j;
+                score = Integer.valueOf(res.point);
             }
         }
         return res;

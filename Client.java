@@ -4,19 +4,46 @@ import java.util.Scanner;
 
 public class Client {
 
-    static class Lire_multicast_udp implements Runnable {
+    static class Lire_multicast implements Runnable {
+
+        static class Lire_UDP implements Runnable {
+
+            DatagramSocket sock_udp;
+            boolean partie_finis = false;
+
+            public Lire_UDP(DatagramSocket s) {
+                sock_udp = s;
+            }
+
+            public void run() {
+                try {
+                    byte[] data = new byte[230];
+                    DatagramPacket paquet = new DatagramPacket(data, data.length);
+                    while (!partie_finis) {
+                        sock_udp.receive(paquet);
+                        String st = new String(paquet.getData(), 0, paquet.getLength());
+                        System.out.println(st.substring(0, st.length() - 3));
+                    }
+                    System.out.println("la lecture udp est finis");
+                } catch (Exception e) {
+                    // e.printStackTrace();
+                    System.out.println("la lecture udp est finis dans le catch");
+                }
+            }
+
+        }
 
         MulticastSocket sock;
         boolean en_cours = true;
+        Lire_UDP lit_udp;
         DatagramSocket data_sock;
 
-        public Lire_multicast_udp(String addr, int port_d, int port_d2) {
+        public Lire_multicast(MulticastSocket ms, DatagramSocket ds, String addr) {
             try {
-                sock = new MulticastSocket(port_d);
+                sock = ms;
                 sock.joinGroup(InetAddress.getByName(addr));
-                if (port_d2 != -1) {
-                    data_sock = new DatagramSocket(port_d2);
-                }
+                data_sock = ds;
+                lit_udp = new Lire_UDP(data_sock);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -24,28 +51,22 @@ public class Client {
 
         public void run() {
             try {
+                Thread udp_t = new Thread(lit_udp);
+                udp_t.start();
                 byte[] data = new byte[230];
-                byte[] data2 = new byte[230];
                 DatagramPacket paquet = new DatagramPacket(data, data.length);
                 while (en_cours) {
-                    // recoit message udp
-                    DatagramPacket paquet2 = new DatagramPacket(data2, data2.length);
-                    data_sock.receive(paquet2);
-                    String st = new String(paquet2.getData(), 0, paquet2.getLength());
-                    System.out.println(st);
-                    // voir si probleme de blocage des message multicast si aucun message udp est
-                    // recu
-
-                    // recoit message multicast
                     sock.receive(paquet);
                     String recu = new String(paquet.getData(), 0, paquet.getLength());
                     System.out.println(recu.substring(0, recu.length() - 3));
                     if (recu.substring(0, 5).equals("ENDGA")) {
                         en_cours = false;
+                        // lit_udp.partie_finis = true;
+                        data_sock.close();
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                System.out.println("la lecture multicast est finis dans le catch");
             }
         }
 
@@ -217,7 +238,8 @@ public class Client {
         }
     }
 
-    public static String lire_pseudo_milieu(BufferedReader br) { // on lit un string qui se situe au milieu d'un message
+    public static String lire_pseudo_milieu(BufferedReader br) { // on lit un string qui se situe au milieu d'un
+                                                                 // message
         String res = "";
         try {
             // br.read(); // on lit l'espace
@@ -234,7 +256,8 @@ public class Client {
         return res;
     }
 
-    public static String lire_pseudo_fin(BufferedReader br) { // on lit un string qui se situe au milieu d'un message
+    public static String lire_pseudo_fin(BufferedReader br) { // on lit un string qui se situe au milieu d'un
+                                                              // message
         String res = "";
         String fin = "";
         boolean prec_etoile = false;
@@ -401,7 +424,10 @@ public class Client {
                 // sock_multi.joinGroup(InetAddress.getByName(ip_partie));
                 partie_en_cours = true;
 
-                Lire_multicast_udp lecture = new Lire_multicast_udp(ip_partie, port_dif, port_udp);
+                MulticastSocket multi_sock = new MulticastSocket(port_dif);
+                DatagramSocket sock_mess = new DatagramSocket(port_udp);
+
+                Lire_multicast lecture = new Lire_multicast(multi_sock, sock_mess, ip_partie);
                 Thread t_lecture = new Thread(lecture);
                 t_lecture.start();
 
@@ -455,6 +481,9 @@ public class Client {
 
                     }
                 }
+
+                multi_sock.close();
+                sock_mess.close();
 
                 System.out.println("le client est sorti du while");
             }

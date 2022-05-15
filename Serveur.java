@@ -133,6 +133,18 @@ public class Serveur {
             }
         }
 
+        public void quitte_partie(PrintWriter pw, BufferedReader br, Joueur j) {
+            try {
+                char[] fin_mess = new char[3];
+                br.read(fin_mess, 0, 3);
+                remove_joueur(j);
+                pw.print("GOBYE***");
+                pw.flush();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
         public String lire_pseudo_milieu(BufferedReader br) { // on lit un string qui se situe au milieu d'un message
             String res = "";
             try {
@@ -435,6 +447,11 @@ public class Serveur {
                                 ecrit.print("NSEND***");
                             }
                             ecrit.flush();
+                        }
+
+                        else if (mess.equals("IQUIT")) {
+                            quitte_partie(ecrit, lire, moi);
+                            partie_en_cours = false;
                         }
 
                     } else {
