@@ -16,6 +16,7 @@ public class Labyrinthe {
         haut = shortToLittleEndian((short) 6);
         lab = new char[6][7];
         nombre_fantome = (byte) ((6 + 7) / 4);
+        generateLab();
         // lab[0][0], lab[1][0], lab[2][0], lab[4][0], lab[5][0] = '|';
         // lab[5][1] = '|';
         // lab[0][2], lab[1][2], lab[2][2], lab[3][2], lab[5][2] = '|';
@@ -26,6 +27,7 @@ public class Labyrinthe {
         larg = shortToLittleEndian((short) 7);
         haut = shortToLittleEndian((short) 6);
         lab = new char[6][7];
+        generateLab();
         nombre_fantome = (byte) ((6 + 7) / 4);
         addresse_diffusion = addr;
         port_diffusion = port;
@@ -130,17 +132,55 @@ public class Labyrinthe {
         String res = "";
         int l = littleEndianToInt(larg);
         int h = littleEndianToInt(haut);
-        for (int i = 0; i < l; i++) {
-            for (int j = 0; j < h; j++) {
-                if (lab[i][j] == '|') {
-                    res += '|';
-                } else {
-                    res += ' ';
-                }
+        for (int i = 0; i < h; i++) {
+            for (int j = 0; j < l; j++) {
+                res += lab[i][j] + " ";
             }
             res += '\n';
         }
         return res;
+    }
+
+    public void generateLab() { // genere le labyrinthe de d'exemple du sujet
+        lab[0][0] = '|';
+        lab[0][1] = 'V';
+        for (int i = 2; i < lab[0].length; i++) {
+            lab[0][i] = '|';
+        }
+        lab[1][0] = '|';
+        lab[1][1] = 'V';
+        lab[1][2] = '|';
+        for (int i = 3; i < lab[1].length; i++) {
+            lab[1][i] = 'V';
+        }
+        lab[2][0] = '|';
+        lab[2][1] = 'V';
+        lab[2][2] = '|';
+        lab[2][3] = '|';
+        lab[2][4] = 'V';
+        lab[2][5] = '|';
+        lab[2][6] = '|';
+        for (int i = 0; i < 5; i++) {
+            lab[3][i] = 'V';
+        }
+        lab[3][2] = '|';
+        lab[3][5] = '|';
+        lab[3][6] = '|';
+
+        lab[4][0] = '|';
+        lab[4][1] = 'V';
+        lab[4][2] = 'V';
+        lab[4][3] = 'V';
+        lab[4][4] = 'V';
+        lab[4][5] = 'V';
+        lab[4][6] = '|';
+
+        for (int i = 0; i < lab[5].length; i++) {
+            lab[5][i] = '|';
+        }
+        lab[5][5] = 'V';
+
+        System.out.println(toString());
     }
 
 }

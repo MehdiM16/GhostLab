@@ -218,6 +218,7 @@ public class Partie implements Runnable, Serializable {
                 DatagramPacket paquet = new DatagramPacket(data, data.length, ia);
                 dso.send(paquet);
                 res = true;
+                dso.close();
             }
         } catch (Exception e) {
             e.printStackTrace();
