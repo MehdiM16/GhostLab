@@ -13,6 +13,7 @@ public class Joueur implements Runnable, Serializable {
     String positionX;
     String positionY;
     String point = "0000";
+    String nom_machine;
 
     public Joueur() {
         pseudo = "anonyme0";
@@ -20,9 +21,10 @@ public class Joueur implements Runnable, Serializable {
         id = -1;
     }
 
-    public Joueur(String pseudo, int port) {
+    public Joueur(String pseudo, int port, String nom) {
         this.pseudo = pseudo;
         port_udp = port;
+        nom_machine = nom;
         this.id = id_tot;
         id_tot++;
     }
