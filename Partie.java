@@ -214,7 +214,7 @@ public class Partie implements Runnable, Serializable {
                 byte[] data;
                 String a_envoyer = "MESSP " + envoyeur.pseudo + " " + message + "+++";
                 data = a_envoyer.getBytes();
-                InetSocketAddress ia = new InetSocketAddress("localhost", objectif.port_udp);
+                InetSocketAddress ia = new InetSocketAddress(objectif.nom_machine, objectif.port_udp);
                 DatagramPacket paquet = new DatagramPacket(data, data.length, ia);
                 dso.send(paquet);
                 res = true;

@@ -274,7 +274,7 @@ public class Serveur {
                         int joueur_port = lire_nombre_fin(lire);
                         System.out.println(pseudo + " " + joueur_port);
                         if (joueur_port != -1) {
-                            moi = new Joueur(pseudo, joueur_port);
+                            moi = new Joueur(pseudo, joueur_port, socket.getInetAddress().getHostName());
                             // t_joueur = new Thread(moi, String.valueOf(moi.id));
                             // t_joueur.start();
                             // moi.joueurThread = t_joueur;
@@ -315,7 +315,7 @@ public class Serveur {
                         int num_partie = lire_nombre_fin(lire);
                         System.out.println(pseudo + " " + joueur_port + " " + num_partie);
                         if (joueur_port != -1 && num_partie != -1) {
-                            moi = new Joueur(pseudo, joueur_port);
+                            moi = new Joueur(pseudo, joueur_port, socket.getInetAddress().getHostName());
                             // t_joueur = new Thread(moi, String.valueOf(moi.id));
                             // t_joueur.start();
                             // moi.joueurThread = t_joueur;
@@ -387,6 +387,9 @@ public class Serveur {
 
                 if (moi.inscrit.peut_commencer()) {
                     partie_en_cours = true;
+                    remove_partie(partie_en_attente, moi.inscrit);
+                    // on supprime la partie qui viens de commencer de la liste des partie en
+                    // attente de commencer
                     int larg = moi.inscrit.labyrinthe.littleEndianToInt(moi.inscrit.labyrinthe.larg);
                     int haut = moi.inscrit.labyrinthe.littleEndianToInt(moi.inscrit.labyrinthe.haut);
                     String addr_tmp = new String(moi.inscrit.address_diffusion);
@@ -458,7 +461,8 @@ public class Serveur {
                         partie_en_cours = false;
                         ecrit.print("GOBYE***");
                         ecrit.flush();
-
+                        remove_partie(liste, moi.inscrit);
+                        // on supprime la partie qui viens de finir de la liste de toutes les partie
                     }
                 }
 
