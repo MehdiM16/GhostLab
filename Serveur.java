@@ -261,36 +261,7 @@ public class Serveur {
 
         public String[] recup_valeur(BufferedReader br) { // lit un message sans tenir compte de la presence
             // d'espace, s'arrete quand la fonction lit ***
-            String res = "";
-            String fin = "";
-            boolean prec_etoile = false;
-            try {
-                char lu = (char) br.read();
-                while (lu == ' ') {
-                    lu = (char) br.read(); // on lit tout les espaces qu'il pourrais y avoir avant de lire ce qu'on veut
-                    // lire
-                }
-                while (!fin.equals("***")) {
-                    if (lu == '*') {
-                        fin += lu;
-                        prec_etoile = true;
-                    } else {
-                        if (prec_etoile) { // on arrive dans ce cas si on lit seulement 1 ou 2 etoiles au milieu d'un
-                            // string
-                            res += fin;
-                            fin = "";
-                        }
-                        res += lu;
-                        prec_etoile = false;
-                    }
-                    if (!fin.equals("***")) {
-                        lu = (char) br.read();
-                    }
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            String res = lire_message_total(br);
             return res.split(" ");
         }
 
@@ -310,7 +281,7 @@ public class Serveur {
                     char[] mess_type = new char[5];
                     lire.read(mess_type, 0, 5);
                     String mess = String.valueOf(mess_type);
-                    System.out.println(mess + " : je suis mess");
+                    System.out.println(mess);
                     if (mess.equals("NEWPL") && moi.inscrit == null) {
                         String[] valeur = recup_valeur(lire);
                         // System.out.println(pseudo + " " + joueur_port);
@@ -404,13 +375,10 @@ public class Serveur {
 
                     else if (mess.equals("GAME?")) {
                         String fin_mess = lire_message_total(lire);
-                        System.out.println("+" + fin_mess + "+");
                         if (!fin_mess.equals("")) {
-                            System.out.println("je suis dans le DUNNO");
                             ecrit.print("DUNNO***");
                             ecrit.flush();
                         } else {
-                            System.out.println("je ne suis pas dans le DUNNO");
                             liste_partie(ecrit);
                         }
                     }
