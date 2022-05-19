@@ -90,64 +90,73 @@ public class Partie implements Runnable, Serializable {
     }
 
     public synchronized int joueTour(Joueur j, String dir, String pas_s) {
-        int pas = Integer.valueOf(pas_s);
-        int posX = Integer.valueOf(j.positionX);
-        int posY = Integer.valueOf(j.positionY);
         int fantome_rencontre = 0;
-        if (dir.equals("UPMOV")) {
-            // posX -= pas; // UPMOV
-            while (posX > 0 && labyrinthe.getCase(posX - 1, posY) != '|' && pas > 0) {
-                posX--;
-                pas--;
-                if (labyrinthe.getCase(posX, posY) == 'F') {
-                    fantome_rencontre++;
-                    labyrinthe.setCase(posX, posY, 'V');
-                    labyrinthe.remove_fantome(j, labyrinthe.posIntToString(posX), labyrinthe.posIntToString(posY));
-                    joueur_prend_fantome(j);
+        try {
+            int pas = Integer.valueOf(pas_s);
+            int posX = Integer.valueOf(j.positionX);
+            int posY = Integer.valueOf(j.positionY);
+            if (dir.equals("UPMOV")) {
+                // posX -= pas; // UPMOV
+                while (posX > 0 && labyrinthe.getCase(posX - 1, posY) != '|' && pas > 0) {
+                    posX--;
+                    pas--;
+                    if (labyrinthe.getCase(posX, posY) == 'F') {
+                        fantome_rencontre++;
+                        labyrinthe.setCase(posX, posY, 'V');
+                        labyrinthe.remove_fantome(j, labyrinthe.posIntToString(posX), labyrinthe.posIntToString(posY));
+                        joueur_prend_fantome(j);
+                    }
                 }
-            }
-            j.positionX = j.posIntToString(posX);
-        } else if (dir.equals("RIMOV")) {
-            // posY += pas; // RIMOV
-            while (posY < labyrinthe.littleEndianToInt(labyrinthe.larg) - 1 && labyrinthe.getCase(posX, posY + 1) != '|'
-                    && pas > 0) {
-                posY++;
-                pas--;
-                if (labyrinthe.getCase(posX, posY) == 'F') {
-                    fantome_rencontre++;
-                    labyrinthe.setCase(posX, posY, 'V');
-                    labyrinthe.remove_fantome(j, labyrinthe.posIntToString(posX), labyrinthe.posIntToString(posY));
-                    joueur_prend_fantome(j);
+                j.positionX = j.posIntToString(posX);
+            } else if (dir.equals("RIMOV")) {
+                // posY += pas; // RIMOV
+                while (posY < labyrinthe.littleEndianToInt(labyrinthe.larg) - 1
+                        && labyrinthe.getCase(posX, posY + 1) != '|'
+                        && pas > 0) {
+                    posY++;
+                    pas--;
+                    if (labyrinthe.getCase(posX, posY) == 'F') {
+                        fantome_rencontre++;
+                        labyrinthe.setCase(posX, posY, 'V');
+                        labyrinthe.remove_fantome(j, labyrinthe.posIntToString(posX), labyrinthe.posIntToString(posY));
+                        joueur_prend_fantome(j);
+                    }
                 }
-            }
-            j.positionY = j.posIntToString(posY);
-        } else if (dir.equals("DOMOV")) {
-            // posX += pas; // DOMOV
-            while (posX < labyrinthe.littleEndianToInt(labyrinthe.haut) - 1 && labyrinthe.getCase(posX + 1, posY) != '|'
-                    && pas > 0) {
-                posX++;
-                pas--;
-                if (labyrinthe.getCase(posX, posY) == 'F') {
-                    fantome_rencontre++;
-                    labyrinthe.setCase(posX, posY, 'V');
-                    labyrinthe.remove_fantome(j, labyrinthe.posIntToString(posX), labyrinthe.posIntToString(posY));
-                    joueur_prend_fantome(j);
+                j.positionY = j.posIntToString(posY);
+            } else if (dir.equals("DOMOV")) {
+                // posX += pas; // DOMOV
+                while (posX < labyrinthe.littleEndianToInt(labyrinthe.haut) - 1
+                        && labyrinthe.getCase(posX + 1, posY) != '|'
+                        && pas > 0) {
+                    posX++;
+                    pas--;
+                    if (labyrinthe.getCase(posX, posY) == 'F') {
+                        fantome_rencontre++;
+                        labyrinthe.setCase(posX, posY, 'V');
+                        labyrinthe.remove_fantome(j, labyrinthe.posIntToString(posX), labyrinthe.posIntToString(posY));
+                        joueur_prend_fantome(j);
+                    }
                 }
-            }
-            j.positionX = j.posIntToString(posX);
-        } else if (dir.equals("LEMOV")) {
-            // posY -= pas; // LEMOV
-            while (posY > 0 && labyrinthe.getCase(posX, posY - 1) != '|' && pas > 0) {
-                posY--;
-                pas--;
-                if (labyrinthe.getCase(posX, posY) == 'F') {
-                    fantome_rencontre++;
-                    labyrinthe.setCase(posX, posY, 'V');
-                    labyrinthe.remove_fantome(j, labyrinthe.posIntToString(posX), labyrinthe.posIntToString(posY));
-                    joueur_prend_fantome(j);
+                j.positionX = j.posIntToString(posX);
+            } else if (dir.equals("LEMOV")) {
+                // posY -= pas; // LEMOV
+                while (posY > 0 && labyrinthe.getCase(posX, posY - 1) != '|' && pas > 0) {
+                    posY--;
+                    pas--;
+                    if (labyrinthe.getCase(posX, posY) == 'F') {
+                        fantome_rencontre++;
+                        labyrinthe.setCase(posX, posY, 'V');
+                        labyrinthe.remove_fantome(j, labyrinthe.posIntToString(posX), labyrinthe.posIntToString(posY));
+                        joueur_prend_fantome(j);
+                    }
                 }
+                j.positionY = j.posIntToString(posY);
+            } else {
+                return -1; // si on arrive ici c'est que le joueur a donner une direction qui n'existe pas
             }
-            j.positionY = j.posIntToString(posY);
+        } catch (Exception e) {
+            return -1; // si on arrive ici c'est que la distance a parcourir ne correspond pas a un
+                       // entier
         }
         return fantome_rencontre;
     }

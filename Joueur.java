@@ -9,7 +9,6 @@ public class Joueur implements Runnable, Serializable {
     int port_udp;
     boolean pret = false;
     Partie inscrit = null;
-    Thread joueurThread;
     String positionX;
     String positionY;
     String point = "0000";

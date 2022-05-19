@@ -74,19 +74,26 @@ public class Client {
 
     public static void lire_partie(BufferedReader br, String mess) {
         try {
-            int nb_partie = lire_nombre_fin(br);
-            System.out.println(mess + " " + nb_partie);
-            for (int i = 0; i < nb_partie; i++) {
-                try {
-                    char[] partie = new char[5];
-                    br.read(partie, 0, 5); // on lit 6 caractere pour lire l'espace avec le message
-                    // br.read();
-                    String part = String.valueOf(partie);// OGAME
-                    int num_partie = lire_nombre_milieu(br);
-                    int nb_inscrit = lire_nombre_fin(br);
-                    System.out.println(part + " " + num_partie + " " + nb_inscrit);
-                } catch (Exception e) {
-                    System.out.println("erreur lecture partie");
+            if (mess.equals("DUNNO")) {
+                br.read();
+                br.read();
+                br.read();
+                System.out.println(mess);
+            } else {
+                int nb_partie = lire_nombre_fin(br);
+                System.out.println(mess + " " + nb_partie);
+                for (int i = 0; i < nb_partie; i++) {
+                    try {
+                        char[] partie = new char[5];
+                        br.read(partie, 0, 5); // on lit 6 caractere pour lire l'espace avec le message
+                        // br.read();
+                        String part = String.valueOf(partie);// OGAME
+                        int num_partie = lire_nombre_milieu(br);
+                        int nb_inscrit = lire_nombre_fin(br);
+                        System.out.println(part + " " + num_partie + " " + nb_inscrit);
+                    } catch (Exception e) {
+                        System.out.println("erreur lecture partie");
+                    }
                 }
             }
         } catch (Exception e) {
@@ -99,7 +106,7 @@ public class Client {
             char[] jou = new char[5];
             br.read(jou, 0, 5);
             String rep = String.valueOf(jou);
-            if (rep.equals("REGNO") || rep.equals("DUNNO")) {
+            if (rep.equals("DUNNO")) {
                 System.out.println(rep);
                 br.read();
                 br.read();
@@ -324,6 +331,18 @@ public class Client {
         return Integer.valueOf(port);
     }
 
+    public static String supprime_espace(String mess) { // supprime des espace inutile a la fin d'un message s'il y en a
+        int taille = mess.length();
+        for (int i = taille - 1; i >= 0; i--) {
+            if (mess.charAt(i) == ' ') {
+                mess = mess.substring(0, mess.length() - 1);
+            } else {
+                return mess;
+            }
+        }
+        return mess;
+    }
+
     public static void main(String[] args) {
         try {
             Socket sock = new Socket("localhost", 9999); // ADAPTER POUR LULU
@@ -341,7 +360,8 @@ public class Client {
             boolean est_inscrit = false;
             while (!mess.equals("START")) { // PROTOCOLE TCP
                 System.out.println("vous pouvez entrer un message");
-                mess = sc.nextLine();
+                String mess_tmp = sc.nextLine();
+                mess = supprime_espace(mess_tmp);
                 ecrit.print(mess + "***");
                 ecrit.flush();
                 System.out.println(mess);
@@ -367,7 +387,7 @@ public class Client {
                     lire_taille_partie(lire);
                 }
 
-                else if (mess.contains("GAMES")) {
+                else if (mess.contains("GAME?")) {
                     lire.read(type_mess, 0, 5);
                     mess_recu = String.valueOf(type_mess);
                     lire_partie(lire, mess_recu);
@@ -399,6 +419,13 @@ public class Client {
                      * lire.read();// on lit les *** pour lire entierement le message
                      */
 
+                } else {
+                    lire.read(type_mess, 0, 5);
+                    mess_recu = String.valueOf(type_mess);
+                    System.out.println(mess_recu);
+                    lire.read();
+                    lire.read();
+                    lire.read();
                 }
             }
 
@@ -440,7 +467,8 @@ public class Client {
 
                 while (partie_en_cours) {
                     System.out.println("vous pouvez entrer un message");
-                    mess = sc.nextLine();
+                    String mess_tmp = sc.nextLine();
+                    mess = supprime_espace(mess_tmp);
                     ecrit.print(mess + "***");
                     ecrit.flush();
                     System.out.println(mess);
@@ -477,6 +505,13 @@ public class Client {
                             lire.read();
                             lire.read();
                             lire.read(); // on lit les ***
+                        }
+
+                        else if (mess_recu.equals("DUNNO")) {
+                            System.out.println(mess_recu);
+                            lire.read();
+                            lire.read();
+                            lire.read();
                         }
 
                     }
