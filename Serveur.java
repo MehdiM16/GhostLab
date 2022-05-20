@@ -541,7 +541,7 @@ public class Serveur {
 
     public static void main(String[] args) {
         try {
-            ServerSocket serv = new ServerSocket(9999);
+            ServerSocket serv = new ServerSocket(9123);
             MulticastSocket mso = new MulticastSocket(12500);
             while (true) {
                 Socket sock = serv.accept();
