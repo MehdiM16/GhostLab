@@ -331,21 +331,26 @@ public class Client {
         return Integer.valueOf(port);
     }
 
-    public static String supprime_espace(String mess) { // supprime des espace inutile a la fin d'un message s'il y en a
+    public static String supprime_espace(String mess) { // supprime des espace inutile au debut et a la fin d'un message
+                                                        // s'il y en a
         int taille = mess.length();
         for (int i = taille - 1; i >= 0; i--) {
             if (mess.charAt(i) == ' ') {
                 mess = mess.substring(0, mess.length() - 1);
             } else {
-                return mess;
+                break;
             }
+        }
+        taille = mess.length();
+        while (mess.charAt(0) == ' ') {
+            mess = mess.substring(1);
         }
         return mess;
     }
 
     public static void main(String[] args) {
         try {
-            Socket sock = new Socket("localhost", 9999); // ADAPTER POUR LULU
+            Socket sock = new Socket("lulu", 9999); // ADAPTER POUR LULU
             BufferedReader lire = new BufferedReader(new InputStreamReader(sock.getInputStream()));
             PrintWriter ecrit = new PrintWriter(new OutputStreamWriter(sock.getOutputStream()));
             Scanner sc = new Scanner(System.in);
@@ -394,7 +399,7 @@ public class Client {
                 }
 
                 else if (mess.contains("REGIS") || mess.contains("NEWPL")) {
-                    port_udp = recup_port(mess);
+                    // port_udp = recup_port(mess);
                     lire.read(type_mess, 0, 5);
                     mess_recu = String.valueOf(type_mess);
                     if (mess_recu.equals("REGNO")) {
@@ -403,6 +408,7 @@ public class Client {
                         lire.read();
                         lire.read(); // on lit les *** pour lire entierement le message
                     } else {
+                        port_udp = recup_port(mess);
                         int num_partie = lire_nombre_fin(lire);
                         System.out.println(mess_recu + " " + num_partie);
                         est_inscrit = true;
