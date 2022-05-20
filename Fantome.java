@@ -1,4 +1,5 @@
 import java.net.*;
+import java.security.KeyStore.TrustedCertificateEntry;
 import java.util.Random;
 
 import javax.swing.text.LayoutQueue;
@@ -43,47 +44,72 @@ public class Fantome implements Runnable {
         return res;
     }
 
-    public void deplacement(String move, int dist) {
+    public synchronized String getPosX() {
+        return positionX;
+    }
+
+    public synchronized String getPosY() {
+        return positionY;
+    }
+
+    public synchronized void setPosX(int x) {
+        positionX = posIntToString(x);
+    }
+
+    public synchronized void setPosY(int y) {
+        positionY = posIntToString(y);
+    }
+
+    public void setAttraper(boolean b) {
+        attraper = b;
+    }
+
+    public void deplacement() {
+        String[] move_possible = { "UPMOV", "RIMOV", "DOMOV", "LEMOV" };
+        boolean a_bouger = false;
         int posX = Integer.valueOf(positionX);
         int posY = Integer.valueOf(positionY);
-        if (move.equals("UPMOV")) {
-            // posX -= pas; // UPMOV
-            while (posX > 0 && labyrinthe.getCase(posX - 1, posY) != '|' && dist > 0) {
-                labyrinthe.setCase(posX, posY, 'V'); // on libere la case
-                posX--;
-                dist--;
-                labyrinthe.setCase(posX, posY, 'F'); // on remplie la nouvelle case par un fantome
+        while (!a_bouger) {
+            String move = move_possible[new Random().nextInt(move_possible.length)];
+            if (move.equals("UPMOV")) {
+                // posX -= pas; // UPMOV
+                if (posX > 0 && labyrinthe.getCase(posX - 1, posY) != '|') {
+                    labyrinthe.setCase(posX, posY, 'V'); // on libere la case
+                    posX--;
+                    labyrinthe.setCase(posX, posY, 'F'); // on remplie la nouvelle case par un fantome
+                    setPosX(posX);
+                    a_bouger = true;
+                }
+            } else if (move.equals("RIMOV")) {
+                // posY += pas; // RIMOV
+                if (posY < labyrinthe.littleEndianToInt(labyrinthe.larg) - 1
+                        && labyrinthe.getCase(posX, posY + 1) != '|') {
+                    labyrinthe.setCase(posX, posY, 'V'); // on libere la case
+                    posY++;
+                    labyrinthe.setCase(posX, posY, 'F'); // on remplie la nouvelle case par un fantome
+                    setPosY(posY);
+                    a_bouger = true;
+                }
+            } else if (move.equals("DOMOV")) {
+                // posX += pas; // DOMOV
+                if (posX < labyrinthe.littleEndianToInt(labyrinthe.haut) - 1
+                        && labyrinthe.getCase(posX + 1, posY) != '|') {
+                    labyrinthe.setCase(posX, posY, 'V'); // on libere la case
+                    posX++;
+                    labyrinthe.setCase(posX, posY, 'F'); // on remplie la nouvelle case par un fantome
+                    setPosX(posX);
+                    a_bouger = true;
+                }
+            } else if (move.equals("LEMOV")) {
+                // posY -= pas; // LEMOV
+                if (posY > 0 && labyrinthe.getCase(posX, posY - 1) != '|') {
+                    labyrinthe.setCase(posX, posY, 'V'); // on libere la case
+                    posY--;
+                    labyrinthe.setCase(posX, posY, 'F'); // on remplie la nouvelle case par un fantome
+                    setPosY(posY);
+                    a_bouger = true;
+                }
             }
-            positionX = posIntToString(posX);
-        } else if (move.equals("RIMOV")) {
-            // posY += pas; // RIMOV
-            while (posY < labyrinthe.littleEndianToInt(labyrinthe.larg) - 1 && labyrinthe.getCase(posX, posY + 1) != '|'
-                    && dist > 0) {
-                labyrinthe.setCase(posX, posY, 'V'); // on libere la case
-                posY++;
-                dist--;
-                labyrinthe.setCase(posX, posY, 'F'); // on remplie la nouvelle case par un fantome
-            }
-            positionY = posIntToString(posY);
-        } else if (move.equals("DOMOV")) {
-            // posX += pas; // DOMOV
-            while (posX < labyrinthe.littleEndianToInt(labyrinthe.haut) - 1 && labyrinthe.getCase(posX + 1, posY) != '|'
-                    && dist > 0) {
-                labyrinthe.setCase(posX, posY, 'V'); // on libere la case
-                posX++;
-                dist--;
-                labyrinthe.setCase(posX, posY, 'F'); // on remplie la nouvelle case par un fantome
-            }
-            positionX = posIntToString(posX);
-        } else if (move.equals("LEMOV")) {
-            // posY -= pas; // LEMOV
-            while (posY > 0 && labyrinthe.getCase(posX, posY - 1) != '|' && dist > 0) {
-                labyrinthe.setCase(posX, posY, 'V'); // on libere la case
-                posY--;
-                dist--;
-                labyrinthe.setCase(posX, posY, 'F'); // on remplie la nouvelle case par un fantome
-            }
-            positionY = posIntToString(posY);
         }
     }
 
@@ -103,11 +129,10 @@ public class Fantome implements Runnable {
             byte[] data;
             InetSocketAddress dest = new InetSocketAddress(byteArrayToString(addresse_diffusion),
                     Integer.valueOf(port_diffusion));
-            String[] move_possible = { "UPMOV", "RIMOV", "DOMOV", "LEMOV" };
             while (!attraper) {
-                int choix = new Random().nextInt(4);
-                deplacement(move_possible[choix], vitesse);
+                deplacement();
                 String a_envoyer = "GHOST id : " + id + " " + positionX + " " + positionY + "+++";
+                // ENLEVER ID FANTOME DU MESSAGE A ENVOYER QUAND TEST FINIS
                 data = a_envoyer.getBytes();
                 DatagramPacket message = new DatagramPacket(data, data.length, dest);
                 sock_envoie.send(message);

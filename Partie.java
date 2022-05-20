@@ -89,7 +89,7 @@ public class Partie implements Runnable, Serializable {
         return true;
     }
 
-    public synchronized int joueTour(Joueur j, String dir, String pas_s) {
+    public int joueTour(Joueur j, String dir, String pas_s) {
         int fantome_rencontre = 0;
         try {
             int pas = Integer.valueOf(pas_s);
@@ -100,6 +100,8 @@ public class Partie implements Runnable, Serializable {
                 while (posX > 0 && labyrinthe.getCase(posX - 1, posY) != '|' && pas > 0) {
                     posX--;
                     pas--;
+                    // j.positionX = j.posIntToString(posX);
+                    j.setPosX(posX);
                     if (labyrinthe.getCase(posX, posY) == 'F') {
                         fantome_rencontre++;
                         labyrinthe.setCase(posX, posY, 'V');
@@ -107,7 +109,6 @@ public class Partie implements Runnable, Serializable {
                         joueur_prend_fantome(j);
                     }
                 }
-                j.positionX = j.posIntToString(posX);
             } else if (dir.equals("RIMOV")) {
                 // posY += pas; // RIMOV
                 while (posY < labyrinthe.littleEndianToInt(labyrinthe.larg) - 1
@@ -115,6 +116,8 @@ public class Partie implements Runnable, Serializable {
                         && pas > 0) {
                     posY++;
                     pas--;
+                    // j.positionY = j.posIntToString(posY);
+                    j.setPosY(posY);
                     if (labyrinthe.getCase(posX, posY) == 'F') {
                         fantome_rencontre++;
                         labyrinthe.setCase(posX, posY, 'V');
@@ -122,7 +125,6 @@ public class Partie implements Runnable, Serializable {
                         joueur_prend_fantome(j);
                     }
                 }
-                j.positionY = j.posIntToString(posY);
             } else if (dir.equals("DOMOV")) {
                 // posX += pas; // DOMOV
                 while (posX < labyrinthe.littleEndianToInt(labyrinthe.haut) - 1
@@ -130,6 +132,8 @@ public class Partie implements Runnable, Serializable {
                         && pas > 0) {
                     posX++;
                     pas--;
+                    // j.positionX = j.posIntToString(posX);
+                    j.setPosX(posX);
                     if (labyrinthe.getCase(posX, posY) == 'F') {
                         fantome_rencontre++;
                         labyrinthe.setCase(posX, posY, 'V');
@@ -137,12 +141,13 @@ public class Partie implements Runnable, Serializable {
                         joueur_prend_fantome(j);
                     }
                 }
-                j.positionX = j.posIntToString(posX);
             } else if (dir.equals("LEMOV")) {
                 // posY -= pas; // LEMOV
                 while (posY > 0 && labyrinthe.getCase(posX, posY - 1) != '|' && pas > 0) {
                     posY--;
                     pas--;
+                    // j.positionY = j.posIntToString(posY);
+                    j.setPosY(posY);
                     if (labyrinthe.getCase(posX, posY) == 'F') {
                         fantome_rencontre++;
                         labyrinthe.setCase(posX, posY, 'V');
@@ -150,7 +155,6 @@ public class Partie implements Runnable, Serializable {
                         joueur_prend_fantome(j);
                     }
                 }
-                j.positionY = j.posIntToString(posY);
             } else {
                 return -1; // si on arrive ici c'est que le joueur a donner une direction qui n'existe pas
             }

@@ -28,6 +28,18 @@ public class Joueur implements Runnable, Serializable {
         id_tot++;
     }
 
+    public synchronized void setPosX(int x) {
+        positionX = posIntToString(x);
+    }
+
+    public synchronized void setPosY(int y) {
+        positionY = posIntToString(y);
+    }
+
+    public synchronized void setPoint(String p) {
+        point = p;
+    }
+
     public String posIntToString(int p) {
         String res = String.valueOf(p);
         if (res.length() == 1) {

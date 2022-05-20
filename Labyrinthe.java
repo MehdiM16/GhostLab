@@ -27,7 +27,7 @@ public class Labyrinthe {
         larg = shortToLittleEndian((short) 7);
         haut = shortToLittleEndian((short) 6);
         lab = new char[6][7];
-        generateLab();
+        // generateLab();
         nombre_fantome = (byte) ((6 + 7) / 4);
         addresse_diffusion = addr;
         port_diffusion = port;
@@ -73,17 +73,17 @@ public class Labyrinthe {
         liste.add(f);
     }
 
-    public synchronized void remove_fantome(Joueur j, String x, String y) { // peut etre probleme a cause du
-                                                                            // synchronized, a voir
+    public void remove_fantome(Joueur j, String x, String y) { // peut etre probleme a cause du
+        // synchronized, a voir
         // lors des test
         try {
             Fantome a_supprimer = new Fantome();
             for (Fantome f : liste) {
-                if (f.positionX.equals(x) && f.positionY.equals(y)) {
-                    f.attraper = true;
+                if (f.getPosX().equals(x) && f.getPosY().equals(y)) {
+                    f.setAttraper(true);
                     int mon_score = Integer.valueOf(j.point);
                     int new_score = mon_score + 50;
-                    j.point = String.valueOf(j.scoreToString(new_score));
+                    j.setPoint(String.valueOf(j.scoreToString(new_score)));
                     a_supprimer = f;
                 }
             }
@@ -111,7 +111,7 @@ public class Labyrinthe {
                                         // ligne et les 3 suivant pour la colonne
         int a = new Random().nextInt(littleEndianToInt(haut));
         int b = new Random().nextInt(littleEndianToInt(larg));
-        while (lab[a][b] == '|' || lab[a][b] == 'F' || lab[a][b] == 'J') {
+        while (lab[a][b] == '|' || lab[a][b] == 'F') {
             a = new Random().nextInt(littleEndianToInt(haut));
             b = new Random().nextInt(littleEndianToInt(larg));
         }
