@@ -27,7 +27,7 @@ public class Labyrinthe {
         larg = shortToLittleEndian((short) 7);
         haut = shortToLittleEndian((short) 6);
         lab = new char[6][7];
-        // generateLab();
+        generateLab();
         nombre_fantome = (byte) ((6 + 7) / 4);
         addresse_diffusion = addr;
         port_diffusion = port;

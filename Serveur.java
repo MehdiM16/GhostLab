@@ -54,6 +54,7 @@ public class Serveur {
 
         public void liste_joueur(PrintWriter pw, BufferedReader br) {
             String[] valeur = recup_valeur(br);
+            print_tab(valeur);
             if (valeur.length == 1) {
                 int num_partie;
                 try {
@@ -89,6 +90,7 @@ public class Serveur {
         public void liste_joueur_partie(BufferedReader br, PrintWriter pw, Joueur j) {
             try {
                 String fin_mess = lire_message_total(br);
+                System.out.println(fin_mess);
                 if (fin_mess.equals("")) {
                     if (j.inscrit != null && j.inscrit.start) {
                         pw.print("GLIS! " + j.inscrit.nombre_inscrit() + "***");
@@ -110,6 +112,7 @@ public class Serveur {
 
         public void taille_labyrinthe(PrintWriter pw, BufferedReader br) {
             String[] valeur = recup_valeur(br);
+            print_tab(valeur);
             if (valeur.length == 1) {
                 int num_partie;
                 try {
@@ -170,23 +173,25 @@ public class Serveur {
             }
         }
 
-        public void lire_mess_inconnue(BufferedReader br, PrintWriter pw) {
-            String fin = "";
-            try {
-                while (!fin.equals("***")) {
-                    char lu = (char) br.read();
-                    if (lu == '*') {
-                        fin += lu;
-                    } else {
-                        fin = "";
-                    }
-                }
-                pw.print("DUNNO***");
-                pw.flush();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+        /*
+         * public void lire_mess_inconnue(BufferedReader br, PrintWriter pw) {
+         * String fin = "";
+         * try {
+         * while (!fin.equals("***")) {
+         * char lu = (char) br.read();
+         * if (lu == '*') {
+         * fin += lu;
+         * } else {
+         * fin = "";
+         * }
+         * }
+         * pw.print("DUNNO***");
+         * pw.flush();
+         * } catch (Exception e) {
+         * e.printStackTrace();
+         * }
+         * }
+         */
 
         public String lire_message_total(BufferedReader br) { // lit un message sans tenir compte de la presence
                                                               // d'espace, s'arrete quand la fonction lit ***
@@ -265,6 +270,13 @@ public class Serveur {
             return res.split(" ");
         }
 
+        public void print_tab(String[] tab) {
+            for (int i = 0; i < tab.length; i++) {
+                System.out.print(tab[i] + " ");
+            }
+            System.out.println("la taille est " + tab.length);
+        }
+
         public void run() {
             try {
                 BufferedReader lire = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -281,10 +293,10 @@ public class Serveur {
                     char[] mess_type = new char[5];
                     lire.read(mess_type, 0, 5);
                     String mess = String.valueOf(mess_type);
-                    System.out.println(mess);
+                    System.out.print(mess + " ");
                     if (mess.equals("NEWPL") && moi.inscrit == null) {
                         String[] valeur = recup_valeur(lire);
-                        // System.out.println(pseudo + " " + joueur_port);
+                        print_tab(valeur);
                         if (valeur.length == 2) {
                             String pseudo = valeur[0];
                             int joueur_port;
@@ -332,7 +344,7 @@ public class Serveur {
 
                     else if (mess.equals("REGIS") && moi.inscrit == null) {
                         String[] valeur = recup_valeur(lire);
-                        // System.out.println(pseudo + " " + joueur_port + " " + num_partie);
+                        print_tab(valeur);
                         if (valeur.length == 3) {
                             String pseudo = valeur[0];
                             int joueur_port;
@@ -375,6 +387,7 @@ public class Serveur {
 
                     else if (mess.equals("GAME?")) {
                         String fin_mess = lire_message_total(lire);
+                        System.out.println(fin_mess);
                         if (!fin_mess.equals("")) {
                             ecrit.print("DUNNO***");
                             ecrit.flush();
@@ -405,7 +418,10 @@ public class Serveur {
                             moi.pret = true;
                         }
                     } else {
-                        lire_mess_inconnue(lire, ecrit);
+                        String inconnu = lire_message_total(lire);
+                        System.out.println(inconnu);
+                        ecrit.print("DUNNO***");
+                        ecrit.flush();
                     }
                 }
 
@@ -450,6 +466,7 @@ public class Serveur {
                         if (mess.equals("UPMOV") || mess.equals("LEMOV") || mess.equals("RIMOV")
                                 || mess.equals("DOMOV")) {
                             String[] valeur = recup_valeur(lire);
+                            print_tab(valeur);
                             if (valeur.length == 1) {
                                 int rencontre = moi.inscrit.joueTour(moi, mess, valeur[0]);
                                 if (rencontre == 0) {
@@ -481,6 +498,7 @@ public class Serveur {
                         else if (mess.equals("SEND?")) {
                             String destinataire = lire_pseudo(lire);
                             String envoie_message = lire_message_total(lire);
+                            System.out.println(destinataire + " " + envoie_message);
                             boolean message_envoyer = moi.inscrit.envoie_message_joueur(moi, destinataire,
                                     envoie_message);
                             if (message_envoyer) {
@@ -497,7 +515,10 @@ public class Serveur {
                         }
 
                         else {
-                            lire_mess_inconnue(lire, ecrit);
+                            String inconnu = lire_message_total(lire);
+                            System.out.println(inconnu);
+                            ecrit.print("DUNNO***");
+                            ecrit.flush();
                         }
 
                     } else {
@@ -520,7 +541,7 @@ public class Serveur {
 
     public static void main(String[] args) {
         try {
-            ServerSocket serv = new ServerSocket(9999);
+            ServerSocket serv = new ServerSocket(9123);
             MulticastSocket mso = new MulticastSocket(12500);
             while (true) {
                 Socket sock = serv.accept();
