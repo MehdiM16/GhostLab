@@ -4,7 +4,7 @@ import java.lang.Runnable;
 import java.util.ArrayList;
 import java.lang.Thread;
 
-public class Partie implements Runnable, Serializable {
+public class Partie implements Runnable {
 
     ArrayList<Joueur> liste = new ArrayList<Joueur>();
     final byte id;
@@ -28,7 +28,7 @@ public class Partie implements Runnable, Serializable {
         }
         address_diffusion = addr_tmp.getBytes();
         port_diffusion = String.valueOf(8000 + id);
-        labyrinthe = new Labyrinthe(address_diffusion, port_diffusion); // valeur random pour test si fonctionne bien
+        labyrinthe = new Labyrinthe(address_diffusion, port_diffusion);
         try {
             dgsock = new DatagramSocket();
         } catch (Exception e) {
@@ -96,11 +96,9 @@ public class Partie implements Runnable, Serializable {
             int posX = Integer.valueOf(j.positionX);
             int posY = Integer.valueOf(j.positionY);
             if (dir.equals("UPMOV")) {
-                // posX -= pas; // UPMOV
                 while (posX > 0 && labyrinthe.getCase(posX - 1, posY) != '|' && pas > 0) {
                     posX--;
                     pas--;
-                    // j.positionX = j.posIntToString(posX);
                     j.setPosX(posX);
                     if (labyrinthe.getCase(posX, posY) == 'F') {
                         fantome_rencontre++;
@@ -110,13 +108,11 @@ public class Partie implements Runnable, Serializable {
                     }
                 }
             } else if (dir.equals("RIMOV")) {
-                // posY += pas; // RIMOV
                 while (posY < labyrinthe.littleEndianToInt(labyrinthe.larg) - 1
                         && labyrinthe.getCase(posX, posY + 1) != '|'
                         && pas > 0) {
                     posY++;
                     pas--;
-                    // j.positionY = j.posIntToString(posY);
                     j.setPosY(posY);
                     if (labyrinthe.getCase(posX, posY) == 'F') {
                         fantome_rencontre++;
@@ -126,13 +122,11 @@ public class Partie implements Runnable, Serializable {
                     }
                 }
             } else if (dir.equals("DOMOV")) {
-                // posX += pas; // DOMOV
                 while (posX < labyrinthe.littleEndianToInt(labyrinthe.haut) - 1
                         && labyrinthe.getCase(posX + 1, posY) != '|'
                         && pas > 0) {
                     posX++;
                     pas--;
-                    // j.positionX = j.posIntToString(posX);
                     j.setPosX(posX);
                     if (labyrinthe.getCase(posX, posY) == 'F') {
                         fantome_rencontre++;
@@ -142,11 +136,9 @@ public class Partie implements Runnable, Serializable {
                     }
                 }
             } else if (dir.equals("LEMOV")) {
-                // posY -= pas; // LEMOV
                 while (posY > 0 && labyrinthe.getCase(posX, posY - 1) != '|' && pas > 0) {
                     posY--;
                     pas--;
-                    // j.positionY = j.posIntToString(posY);
                     j.setPosY(posY);
                     if (labyrinthe.getCase(posX, posY) == 'F') {
                         fantome_rencontre++;
@@ -241,18 +233,11 @@ public class Partie implements Runnable, Serializable {
 
     public void run() {
         try {
-            System.out.println("Je suis une partie");
             while (!peut_commencer()) {
-                // System.out.println("tout les joueur ne sont pas pret");
                 start = false;
-                Thread.sleep(1000);
+                Thread.sleep(500);
             }
             start = true;
-            System.out.println("la partie commence");
-            // cette fonction servira principalement pour faire deplacer les fantomes dans
-            // le labyrinthe
-            // et peut etre pour les message udp et le multicast, je ne sais pas encore
-            // s'il vaut mieux le faire ici ou dans la classe serveur
 
             for (Fantome f : labyrinthe.liste) {
                 Thread t = new Thread(f);
@@ -260,6 +245,7 @@ public class Partie implements Runnable, Serializable {
             }
 
             while (start && !partie_finis()) {
+                Thread.sleep(250);
             }
 
             System.out.println("la partie est terminé");
@@ -271,8 +257,6 @@ public class Partie implements Runnable, Serializable {
             data = a_envoyer.getBytes();
             DatagramPacket message = new DatagramPacket(data, data.length, dest);
             dgsock.send(message);
-
-            // !!!! Voir en cas de 2 joueur qui ont le meme score
 
         } catch (Exception e) {
             e.printStackTrace();

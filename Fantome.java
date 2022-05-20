@@ -1,9 +1,5 @@
 import java.net.*;
-import java.security.KeyStore.TrustedCertificateEntry;
 import java.util.Random;
-
-import javax.swing.text.LayoutQueue;
-
 import java.io.*;
 import java.lang.Runnable;
 
@@ -13,7 +9,6 @@ public class Fantome implements Runnable {
     static int id_tot = 0;
     String positionX;
     String positionY;
-    int vitesse; // plus la vitesse est grande, plus le fantome se deplace rapidement
     boolean attraper = false;
     byte[] addresse_diffusion;
     String port_diffusion;
@@ -29,7 +24,6 @@ public class Fantome implements Runnable {
         positionY = y;
         addresse_diffusion = addr;
         port_diffusion = port;
-        vitesse = new Random().nextInt(3) + 1; // les vitesse possible sont 1, 2 et 3
         labyrinthe = l;
     }
 
@@ -72,7 +66,6 @@ public class Fantome implements Runnable {
         while (!a_bouger) {
             String move = move_possible[new Random().nextInt(move_possible.length)];
             if (move.equals("UPMOV")) {
-                // posX -= pas; // UPMOV
                 if (posX > 0 && labyrinthe.getCase(posX - 1, posY) != '|') {
                     labyrinthe.setCase(posX, posY, 'V'); // on libere la case
                     posX--;
@@ -81,7 +74,6 @@ public class Fantome implements Runnable {
                     a_bouger = true;
                 }
             } else if (move.equals("RIMOV")) {
-                // posY += pas; // RIMOV
                 if (posY < labyrinthe.littleEndianToInt(labyrinthe.larg) - 1
                         && labyrinthe.getCase(posX, posY + 1) != '|') {
                     labyrinthe.setCase(posX, posY, 'V'); // on libere la case
@@ -91,7 +83,6 @@ public class Fantome implements Runnable {
                     a_bouger = true;
                 }
             } else if (move.equals("DOMOV")) {
-                // posX += pas; // DOMOV
                 if (posX < labyrinthe.littleEndianToInt(labyrinthe.haut) - 1
                         && labyrinthe.getCase(posX + 1, posY) != '|') {
                     labyrinthe.setCase(posX, posY, 'V'); // on libere la case
@@ -101,7 +92,6 @@ public class Fantome implements Runnable {
                     a_bouger = true;
                 }
             } else if (move.equals("LEMOV")) {
-                // posY -= pas; // LEMOV
                 if (posY > 0 && labyrinthe.getCase(posX, posY - 1) != '|') {
                     labyrinthe.setCase(posX, posY, 'V'); // on libere la case
                     posY--;
@@ -136,7 +126,7 @@ public class Fantome implements Runnable {
                 data = a_envoyer.getBytes();
                 DatagramPacket message = new DatagramPacket(data, data.length, dest);
                 sock_envoie.send(message);
-                // Thread.sleep(vitesse * 2000);
+                // Thread.sleep(new Random().nextInt(7000) + 8000); // entre 8000 et 15000
                 Thread.sleep(20000);
             }
             System.out.println("je suis le fantome " + id + " et j'ai finis");

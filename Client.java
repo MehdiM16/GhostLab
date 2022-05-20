@@ -26,7 +26,6 @@ public class Client {
                     }
                     System.out.println("la lecture udp est finis");
                 } catch (Exception e) {
-                    // e.printStackTrace();
                     System.out.println("la lecture udp est finis dans le catch");
                 }
             }
@@ -61,7 +60,6 @@ public class Client {
                     System.out.println(recu.substring(0, recu.length() - 3));
                     if (recu.substring(0, 5).equals("ENDGA")) {
                         en_cours = false;
-                        // lit_udp.partie_finis = true;
                         data_sock.close();
                     }
                 }
@@ -85,8 +83,7 @@ public class Client {
                 for (int i = 0; i < nb_partie; i++) {
                     try {
                         char[] partie = new char[5];
-                        br.read(partie, 0, 5); // on lit 6 caractere pour lire l'espace avec le message
-                        // br.read();
+                        br.read(partie, 0, 5);
                         String part = String.valueOf(partie);// OGAME
                         int num_partie = lire_nombre_milieu(br);
                         int nb_inscrit = lire_nombre_fin(br);
@@ -119,7 +116,6 @@ public class Client {
                     char[] joueur_i = new char[5];
                     br.read(joueur_i, 0, 5);
                     String joueur_s = String.valueOf(joueur_i);
-                    br.read();// on lit l'espace
                     String pseudo = lire_pseudo_fin(br);
                     System.out.println(joueur_s + " " + pseudo);
                 }
@@ -175,7 +171,6 @@ public class Client {
                 char[] joueur_i = new char[5];
                 br.read(joueur_i, 0, 5);
                 String joueur_s = String.valueOf(joueur_i);
-                // br.read();// on lit l'espace
                 String pseudo = lire_pseudo_milieu(br);
                 String posX = lire_pseudo_milieu(br);
                 String posY = lire_pseudo_milieu(br);
@@ -249,7 +244,6 @@ public class Client {
                                                                  // message
         String res = "";
         try {
-            // br.read(); // on lit l'espace
             char lu = (char) br.read();
             while (lu != ' ' || res.length() == 0) {
                 if (lu != ' ') { // pour eviter de lire le premier espace
@@ -269,7 +263,6 @@ public class Client {
         String fin = "";
         boolean prec_etoile = false;
         try {
-            // br.read(); // on lit l'espace
             char lu = (char) br.read();
             while (!fin.equals("***")) {
                 if (lu == '*') {
@@ -331,6 +324,41 @@ public class Client {
         return Integer.valueOf(port);
     }
 
+    public static String lire_message_total(BufferedReader br) { // lit un message sans tenir compte de la presence
+        // d'espace, s'arrete quand la fonction lit ***
+        String res = "";
+        String fin = "";
+        boolean prec_etoile = false;
+        try {
+            char lu = (char) br.read();
+            while (lu == ' ') {
+                lu = (char) br.read(); // on lit tout les espaces qu'il pourrais y avoir avant de lire ce qu'on veut
+                // lire
+            }
+            while (!fin.equals("***")) {
+                if (lu == '*') {
+                    fin += lu;
+                    prec_etoile = true;
+                } else {
+                    if (prec_etoile) { // on arrive dans ce cas si on lit seulement 1 ou 2 etoiles au milieu d'un
+                        // string
+                        res += fin;
+                        fin = "";
+                    }
+                    res += lu;
+                    prec_etoile = false;
+                }
+                if (!fin.equals("***")) {
+                    lu = (char) br.read();
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return res;
+    }
+
     public static String supprime_espace(String mess) { // supprime des espace inutile au debut et a la fin d'un message
                                                         // s'il y en a
         int taille = mess.length();
@@ -350,7 +378,7 @@ public class Client {
 
     public static void main(String[] args) {
         try {
-            Socket sock = new Socket("lulu", 9123); // ADAPTER POUR LULU
+            Socket sock = new Socket("localhost", 9123); // ADAPTER POUR LULU
             BufferedReader lire = new BufferedReader(new InputStreamReader(sock.getInputStream()));
             PrintWriter ecrit = new PrintWriter(new OutputStreamWriter(sock.getOutputStream()));
             Scanner sc = new Scanner(System.in);
@@ -399,7 +427,6 @@ public class Client {
                 }
 
                 else if (mess.contains("REGIS") || mess.contains("NEWPL")) {
-                    // port_udp = recup_port(mess);
                     lire.read(type_mess, 0, 5);
                     mess_recu = String.valueOf(type_mess);
                     if (mess_recu.equals("REGNO")) {
@@ -416,22 +443,11 @@ public class Client {
                 }
 
                 else if (mess.contains("START")) {
-                    /*
-                     * lire.read(type_mess, 0, 5);
-                     * mess_recu = String.valueOf(type_mess);
-                     * System.out.println(mess_recu);
-                     * lire.read();
-                     * lire.read();
-                     * lire.read();// on lit les *** pour lire entierement le message
-                     */
+                    // si on envoie START le serveur ne repond rien
+                }
 
-                } else {
-                    lire.read(type_mess, 0, 5);
-                    mess_recu = String.valueOf(type_mess);
-                    System.out.println(mess_recu);
-                    lire.read();
-                    lire.read();
-                    lire.read();
+                else {
+                    System.out.println(lire_message_total(lire));
                 }
             }
 
@@ -439,8 +455,6 @@ public class Client {
                 lire.read(type_mess, 0, 5);
                 mess_recu = String.valueOf(type_mess);
             }
-
-            // MulticastSocket sock_multi;
 
             boolean partie_en_cours = false;
 
@@ -453,8 +467,6 @@ public class Client {
                 int port_dif = lire_nombre_fin(lire);
                 System.out.println("WELCO " + num_partie + " " + hauteur + " " + largeur + " " + nb_fantome + " "
                         + ip_partie + " " + port_dif);
-                // sock_multi = new MulticastSocket(port_dif);
-                // sock_multi.joinGroup(InetAddress.getByName(ip_partie));
                 partie_en_cours = true;
 
                 MulticastSocket multi_sock = new MulticastSocket(port_dif);
@@ -520,13 +532,15 @@ public class Client {
                             lire.read();
                         }
 
+                        else {
+                            System.out.println(lire_message_total(lire));
+                        }
+
                     }
                 }
 
                 multi_sock.close();
                 sock_mess.close();
-
-                System.out.println("le client est sorti du while");
             }
 
             sc.close();

@@ -128,7 +128,7 @@ public class Serveur {
                     for (Partie p : liste) {
                         int larg = p.labyrinthe.littleEndianToInt(p.labyrinthe.larg);
                         int haut = p.labyrinthe.littleEndianToInt(p.labyrinthe.haut);
-                        if (p.id == num_partie) { // il faut enlever les *** de instruction[1]
+                        if (p.id == num_partie) {
                             pw.print("SIZE! " + num_partie + " " + larg + " " + haut + "***");
                             a_ecrit = true;
                         }
@@ -163,35 +163,19 @@ public class Serveur {
 
         public void quitte_partie(PrintWriter pw, BufferedReader br, Joueur j) {
             try {
-                char[] fin_mess = new char[3];
-                br.read(fin_mess, 0, 3);
-                remove_joueur(j);
-                pw.print("GOBYE***");
+                String fin_mess = lire_message_total(br);
+                System.out.println(fin_mess);
+                if (fin_mess.equals("")) {
+                    remove_joueur(j);
+                    pw.print("GOBYE***");
+                } else {
+                    pw.print("DUNNO***");
+                }
                 pw.flush();
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-
-        /*
-         * public void lire_mess_inconnue(BufferedReader br, PrintWriter pw) {
-         * String fin = "";
-         * try {
-         * while (!fin.equals("***")) {
-         * char lu = (char) br.read();
-         * if (lu == '*') {
-         * fin += lu;
-         * } else {
-         * fin = "";
-         * }
-         * }
-         * pw.print("DUNNO***");
-         * pw.flush();
-         * } catch (Exception e) {
-         * e.printStackTrace();
-         * }
-         * }
-         */
 
         public String lire_message_total(BufferedReader br) { // lit un message sans tenir compte de la presence
                                                               // d'espace, s'arrete quand la fonction lit ***
@@ -228,9 +212,7 @@ public class Serveur {
             return res;
         }
 
-        public String lire_pseudo(BufferedReader br) { // on lit un string qui se situe au milieu
-            // d'un
-            // message
+        public String lire_pseudo(BufferedReader br) { // on lit un string correspondant a un seul argument d'un message
             String res = "";
             String fin = "";
             boolean prec_etoile = false;
@@ -274,7 +256,7 @@ public class Serveur {
             for (int i = 0; i < tab.length; i++) {
                 System.out.print(tab[i] + " ");
             }
-            System.out.println("la taille est " + tab.length);
+            System.out.println("");
         }
 
         public void run() {
@@ -309,28 +291,18 @@ public class Serveur {
                                 moi = new Joueur(pseudo, joueur_port, socket.getInetAddress().getHostName());
 
                                 Partie pnew = new Partie();
-                                System.out.println("la partie d'id " + pnew.id + " viens d'etre cree"); // TEST
-                                Thread tpart = new Thread(pnew, String.valueOf(pnew.id)); // pas sur que soit necessaire
-                                                                                          // de
-                                                                                          // créer
+                                Thread tpart = new Thread(pnew);
                                 tpart.start();
                                 pnew.partThread = tpart;
                                 enregistre_partie(liste, pnew);
-                                // partie_en_attente.add(pnew);
                                 enregistre_partie(partie_en_attente, pnew);
                                 boolean enregistre = enregistre_joueur(moi, pnew.id);
-                                // moi.inscrit = pnew;
                                 if (enregistre) {
                                     ecrit.print("REGOK " + pnew.id + "***");
                                     ecrit.flush();
                                 } else {
                                     ecrit.print("REGNO***");
                                     ecrit.flush();
-                                }
-                                if (moi.inscrit == null) {
-                                    System.out.println("frerot tes pas inscrit");
-                                } else {
-                                    System.out.println("tes inscrit frerot");
                                 }
                             } else {
                                 ecrit.print("REGNO***");
@@ -366,11 +338,6 @@ public class Serveur {
                                     ecrit.print("REGNO***");
                                     ecrit.flush();
                                 }
-                                if (moi.inscrit == null) {
-                                    System.out.println("frerot tes pas inscrit");
-                                } else {
-                                    System.out.println("tes inscrit frerot");
-                                }
                             } else {
                                 ecrit.print("REGNO***");
                                 ecrit.flush();
@@ -405,19 +372,16 @@ public class Serveur {
                     }
 
                     else if (mess.equals("START")) {
-                        char[] fin_mess = new char[3];
-                        lire.read(fin_mess, 0, 3);
-                        if (moi.inscrit == null || !(String.valueOf(fin_mess).equals("***"))) {
-                            // ecrit.print("DUNNO***");
-                            // ecrit.flush();
+                        String fin_mess = lire_message_total(lire);
+                        if (moi.inscrit == null || !fin_mess.equals("")) {
                             joueur_pret = false;
                         } else {
-                            // ecrit.print("ATTEN***");
-                            // ecrit.flush();
                             joueur_pret = true;
                             moi.pret = true;
                         }
-                    } else {
+                    }
+
+                    else {
                         String inconnu = lire_message_total(lire);
                         System.out.println(inconnu);
                         ecrit.print("DUNNO***");
@@ -425,7 +389,6 @@ public class Serveur {
                     }
                 }
 
-                System.out.println("nous sommes sortie du while ahah");
                 boolean partie_en_cours = false;
 
                 while (!moi.inscrit.peut_commencer()) {
@@ -441,7 +404,6 @@ public class Serveur {
                     int larg = moi.inscrit.labyrinthe.littleEndianToInt(moi.inscrit.labyrinthe.larg);
                     int haut = moi.inscrit.labyrinthe.littleEndianToInt(moi.inscrit.labyrinthe.haut);
                     String addr_tmp = new String(moi.inscrit.address_diffusion);
-                    System.out.println("la partie peut commencer");
                     ecrit.print("WELCO " + moi.inscrit.id + " " + haut + " "
                             + larg + " " + moi.inscrit.labyrinthe.nombre_fantome
                             + " " + addr_tmp + " " + moi.inscrit.port_diffusion + "***");
@@ -449,7 +411,6 @@ public class Serveur {
                 }
 
                 String pos = moi.inscrit.labyrinthe.positionAleatoire();
-                System.out.println(pos);
                 String pos_x = pos.substring(0, 3);
                 String pos_y = pos.substring(3);
                 moi.positionX = pos_x;
@@ -461,7 +422,7 @@ public class Serveur {
                     char[] mess_type = new char[5];
                     lire.read(mess_type, 0, 5);
                     String mess = String.valueOf(mess_type);
-                    System.out.println(mess);
+                    System.out.print(mess + " ");
                     if (!moi.inscrit.partie_finis()) {
                         if (mess.equals("UPMOV") || mess.equals("LEMOV") || mess.equals("RIMOV")
                                 || mess.equals("DOMOV")) {
@@ -542,7 +503,6 @@ public class Serveur {
     public static void main(String[] args) {
         try {
             ServerSocket serv = new ServerSocket(9123);
-            MulticastSocket mso = new MulticastSocket(12500);
             while (true) {
                 Socket sock = serv.accept();
                 Connexion connex = new Connexion(sock);

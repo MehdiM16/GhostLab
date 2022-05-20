@@ -11,18 +11,6 @@ public class Labyrinthe {
     byte[] addresse_diffusion;
     String port_diffusion;
 
-    public Labyrinthe() { // exemple du sujet
-        larg = shortToLittleEndian((short) 7);
-        haut = shortToLittleEndian((short) 6);
-        lab = new char[6][7];
-        nombre_fantome = (byte) ((6 + 7) / 4);
-        generateLab();
-        // lab[0][0], lab[1][0], lab[2][0], lab[4][0], lab[5][0] = '|';
-        // lab[5][1] = '|';
-        // lab[0][2], lab[1][2], lab[2][2], lab[3][2], lab[5][2] = '|';
-        // je complète plus tard
-    }
-
     public Labyrinthe(byte[] addr, String port) {
         larg = shortToLittleEndian((short) 7);
         haut = shortToLittleEndian((short) 6);
@@ -34,8 +22,8 @@ public class Labyrinthe {
         for (int i = 0; i < nombre_fantome; i++) {
             String pos = positionAleatoire();
             Fantome f = new Fantome(pos.substring(0, 3), pos.substring(3), addresse_diffusion, port_diffusion, this);
-            liste.add(f); // je ne sais pas encore s'il faut synchronized ici ou non donc peut etre
-                          // modifier par add_fantome()
+            // liste.add(f);
+            add_fantome(f);
         }
     }
 
@@ -43,13 +31,6 @@ public class Labyrinthe {
     // et les cases vide par un V
     // On pourra definir la position de base des fantome avec la fonction
     // positionAleatoire()
-
-    public Labyrinthe(short l1, short l2) {
-        haut = shortToLittleEndian(l1);
-        larg = shortToLittleEndian(l2);
-        lab = new char[l1][l2];
-        nombre_fantome = (byte) ((l1 + l2) / 4);
-    }
 
     public synchronized void setCase(int x, int y, char c) {
         try {
@@ -68,14 +49,11 @@ public class Labyrinthe {
         return ' ';
     }
 
-    public void add_fantome(Fantome f) {// peut etre probleme a cause du synchronized, a voir
-        // lors des test
+    public synchronized void add_fantome(Fantome f) {
         liste.add(f);
     }
 
-    public void remove_fantome(Joueur j, String x, String y) { // peut etre probleme a cause du
-        // synchronized, a voir
-        // lors des test
+    public synchronized void remove_fantome(Joueur j, String x, String y) {
         try {
             Fantome a_supprimer = new Fantome();
             for (Fantome f : liste) {

@@ -1,7 +1,7 @@
 import java.net.*;
 import java.io.*;
 
-public class Joueur implements Runnable, Serializable {
+public class Joueur {
 
     String pseudo;
     final int id;
@@ -62,47 +62,50 @@ public class Joueur implements Runnable, Serializable {
         return res;
     }
 
-    public void sendMessage(String mess) {
-        try {
-            DatagramSocket ds = new DatagramSocket(); // pour envoyer
-            byte[] data = new byte[100];
-            InetSocketAddress ia = new InetSocketAddress("225.1.2.4", 11000);
-            data = mess.getBytes();
-            DatagramPacket dp = new DatagramPacket(data, data.length, ia);
-            ds.send(dp);
-            ds.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public String recvMessageMLT(MulticastSocket mso) { // on suppose qu'on est deja abonné
-        try {
-            byte[] data = new byte[100];
-            DatagramPacket paquet = new DatagramPacket(data, data.length);
-            mso.receive(paquet);
-            String res = new String(paquet.getData(), 0, paquet.getLength());
-            return res;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return "erreur reception message";
-    }
-
-    public String recvMessageNRM(DatagramSocket ds) {
-        try {
-            byte[] data = new byte[100];
-            DatagramPacket paquet = new DatagramPacket(data, data.length);
-            ds.receive(paquet);
-            String res = new String(paquet.getData(), 0, paquet.getLength());
-            return res;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return "erreur reception message";
-    }
-
-    public void run() {
-    }
+    /*
+     * public void sendMessage(String mess) {
+     * try {
+     * DatagramSocket ds = new DatagramSocket(); // pour envoyer
+     * byte[] data = new byte[100];
+     * InetSocketAddress ia = new InetSocketAddress("225.1.2.4", 11000);
+     * data = mess.getBytes();
+     * DatagramPacket dp = new DatagramPacket(data, data.length, ia);
+     * ds.send(dp);
+     * ds.close();
+     * } catch (Exception e) {
+     * e.printStackTrace();
+     * }
+     * }
+     * 
+     * public String recvMessageMLT(MulticastSocket mso) { // on suppose qu'on est
+     * deja abonné
+     * try {
+     * byte[] data = new byte[100];
+     * DatagramPacket paquet = new DatagramPacket(data, data.length);
+     * mso.receive(paquet);
+     * String res = new String(paquet.getData(), 0, paquet.getLength());
+     * return res;
+     * } catch (Exception e) {
+     * e.printStackTrace();
+     * }
+     * return "erreur reception message";
+     * }
+     * 
+     * public String recvMessageNRM(DatagramSocket ds) {
+     * try {
+     * byte[] data = new byte[100];
+     * DatagramPacket paquet = new DatagramPacket(data, data.length);
+     * ds.receive(paquet);
+     * String res = new String(paquet.getData(), 0, paquet.getLength());
+     * return res;
+     * } catch (Exception e) {
+     * e.printStackTrace();
+     * }
+     * return "erreur reception message";
+     * }
+     * 
+     * public void run() {
+     * }
+     */
 
 }
