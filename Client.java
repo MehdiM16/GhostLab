@@ -378,7 +378,7 @@ public class Client {
 
     public static void main(String[] args) {
         try {
-            Socket sock = new Socket("localhost", 9123); // ADAPTER POUR LULU
+            Socket sock = new Socket("192.168.70.236", 9123); // ADAPTER POUR LULU
             BufferedReader lire = new BufferedReader(new InputStreamReader(sock.getInputStream()));
             PrintWriter ecrit = new PrintWriter(new OutputStreamWriter(sock.getOutputStream()));
             Scanner sc = new Scanner(System.in);
@@ -409,6 +409,7 @@ public class Client {
                 else if (mess.contains("UNREG")) {
                     lire.read(type_mess, 0, 5);
                     mess_recu = String.valueOf(type_mess);
+                    est_inscrit = false;
                     if (mess_recu.equals("DUNNO")) {
                         System.out.println(mess_recu);
                         lire.read();
