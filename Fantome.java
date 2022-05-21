@@ -126,7 +126,7 @@ public class Fantome implements Runnable {
                 data = a_envoyer.getBytes();
                 DatagramPacket message = new DatagramPacket(data, data.length, dest);
                 sock_envoie.send(message);
-                // Thread.sleep(new Random().nextInt(7000) + 8000); // entre 8000 et 15000
+                // Thread.sleep(new Random().nextInt(10000) + 10000); // entre 10000 et 20000
                 Thread.sleep(20000);
             }
             System.out.println("je suis le fantome " + id + " et j'ai finis");

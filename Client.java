@@ -370,7 +370,7 @@ public class Client {
             }
         }
         taille = mess.length();
-        while (mess.charAt(0) == ' ') {
+        while (mess.length() > 0 && mess.charAt(0) == ' ') {
             mess = mess.substring(1);
         }
         return mess;
@@ -395,6 +395,10 @@ public class Client {
                 System.out.println("vous pouvez entrer un message");
                 String mess_tmp = sc.nextLine();
                 mess = supprime_espace(mess_tmp);
+                if (mess.length() < 5) {
+                    System.out.println("message non reconnue");
+                    continue;
+                }
                 ecrit.print(mess + "***");
                 ecrit.flush();
                 System.out.println(mess);
@@ -487,6 +491,10 @@ public class Client {
                     System.out.println("vous pouvez entrer un message");
                     String mess_tmp = sc.nextLine();
                     mess = supprime_espace(mess_tmp);
+                    if (mess.length() < 5) {
+                        System.out.println("message non reconnue");
+                        continue;
+                    }
                     ecrit.print(mess + "***");
                     ecrit.flush();
                     System.out.println(mess);
