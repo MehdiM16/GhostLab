@@ -409,6 +409,7 @@ public class Client {
                 else if (mess.contains("UNREG")) {
                     lire.read(type_mess, 0, 5);
                     mess_recu = String.valueOf(type_mess);
+                    est_inscrit = false;
                     if (mess_recu.equals("DUNNO")) {
                         System.out.println(mess_recu);
                         lire.read();
