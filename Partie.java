@@ -12,11 +12,10 @@ public class Partie implements Runnable {
     byte nombre_joueur = 0;
     boolean start = false;
     Labyrinthe labyrinthe;
-    Thread partThread;
     byte[] address_diffusion;
     String port_diffusion;
     Socket sock;
-    DatagramSocket dgsock;
+    DatagramSocket dgsock; // socket de multidiffusion
 
     public Partie() {
         id = id_tot;
@@ -257,6 +256,8 @@ public class Partie implements Runnable {
             data = a_envoyer.getBytes();
             DatagramPacket message = new DatagramPacket(data, data.length, dest);
             dgsock.send(message);
+
+            dgsock.close();
 
         } catch (Exception e) {
             e.printStackTrace();

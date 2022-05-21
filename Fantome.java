@@ -121,7 +121,7 @@ public class Fantome implements Runnable {
                     Integer.valueOf(port_diffusion));
             while (!attraper) {
                 deplacement();
-                String a_envoyer = "GHOST id : " + id + " " + positionX + " " + positionY + "+++";
+                String a_envoyer = "GHOST " + positionX + " " + positionY + "+++";
                 // ENLEVER ID FANTOME DU MESSAGE A ENVOYER QUAND TEST FINIS
                 data = a_envoyer.getBytes();
                 DatagramPacket message = new DatagramPacket(data, data.length, dest);
@@ -129,7 +129,6 @@ public class Fantome implements Runnable {
                 // Thread.sleep(new Random().nextInt(10000) + 10000); // entre 10000 et 20000
                 Thread.sleep(20000);
             }
-            System.out.println("je suis le fantome " + id + " et j'ai finis");
 
             sock_envoie.close();
         } catch (Exception e) {

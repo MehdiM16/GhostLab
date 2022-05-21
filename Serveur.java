@@ -293,7 +293,6 @@ public class Serveur {
                                 Partie pnew = new Partie();
                                 Thread tpart = new Thread(pnew);
                                 tpart.start();
-                                pnew.partThread = tpart;
                                 enregistre_partie(liste, pnew);
                                 enregistre_partie(partie_en_attente, pnew);
                                 boolean enregistre = enregistre_joueur(moi, pnew.id);
